@@ -1,14 +1,21 @@
 using System.Text.RegularExpressions;
 using LevelUp.Api.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace LevelUp.Api.Data;
 
-public partial class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
+/// <summary>
+/// IdentityUserContext giver tabellerne til brugere, claims, eksterne logins og tokens.
+/// Roller bruges ikke, så IdentityDbContext er ikke nødvendig.
+/// </summary>
+public partial class AppDbContext(DbContextOptions<AppDbContext> options)
+    : IdentityUserContext<AppUser, int>(options)
 {
     private const string UtcNowSql = "SYSUTCDATETIME()";
 
-    public DbSet<AppUser> Users => Set<AppUser>();
+    // Users kommer fra IdentityUserContext
     public DbSet<UserSettings> UserSettings => Set<UserSettings>();
     public DbSet<UserCharacter> UserCharacters => Set<UserCharacter>();
     public DbSet<TaskItem> Tasks => Set<TaskItem>();
@@ -24,11 +31,16 @@ public partial class AppDbContext(DbContextOptions<AppDbContext> options) : DbCo
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // Opsætter Identity-tabellerne – skal kaldes først
+        base.OnModelCreating(modelBuilder);
+
         modelBuilder.Entity<AppUser>(user =>
         {
             user.Property(u => u.Email).HasMaxLength(255);
             user.Property(u => u.PasswordHash).HasMaxLength(255);
+            user.Property(u => u.PhoneNumber).HasMaxLength(20);
             user.Property(u => u.DisplayName).HasMaxLength(100);
+            user.Property(u => u.TwoFactorMethod).HasConversion<string>().HasMaxLength(20);
             user.Property(u => u.TotalXp).HasDefaultValue(0);
             user.Property(u => u.CoinBalance).HasDefaultValue(0);
             user.Property(u => u.CreatedAt).HasDefaultValueSql(UtcNowSql);
@@ -46,7 +58,6 @@ public partial class AppDbContext(DbContextOptions<AppDbContext> options) : DbCo
 
         modelBuilder.Entity<UserSettings>(settings =>
         {
-            settings.Property(s => s.PhoneNumber).HasMaxLength(20);
             settings.Property(s => s.TimeZone).HasMaxLength(50);
         });
 
@@ -170,6 +181,11 @@ public partial class AppDbContext(DbContextOptions<AppDbContext> options) : DbCo
         // Klasser hvis navn ikke matcher tabellen i ERD'en
         modelBuilder.Entity<TaskItem>().ToTable("task");
         modelBuilder.Entity<UserInventoryItem>().ToTable("user_inventory");
+
+        // Identity's hjælpetabeller
+        modelBuilder.Entity<IdentityUserClaim<int>>().ToTable("user_claim");
+        modelBuilder.Entity<IdentityUserLogin<int>>().ToTable("user_login");
+        modelBuilder.Entity<IdentityUserToken<int>>().ToTable("user_token");
     }
 
     /// <summary>

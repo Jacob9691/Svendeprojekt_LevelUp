@@ -1,11 +1,12 @@
 using LevelUp.Api.Models;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 
 namespace LevelUp.Api.Data;
 
 public static class SeedData
 {
+    public const string DemoEmail = "demo@levelup.local";
+
     /// <summary>Genstande i shoppen. Lægges ind via migrationen (HasData).</summary>
     public static readonly ShopItem[] ShopItems =
     [
@@ -18,28 +19,50 @@ public static class SeedData
     ];
 
     /// <summary>
-    /// Opretter en demo-bruger i Development, så API'et kan testes før login er implementeret.
-    /// Fjernes når login og JWT er på plads.
+    /// Opretter en bekræftet demo-bruger i Development, så API'et hurtigt kan afprøves.
+    /// Adgangskoden læses fra konfigurationen "DemoUser:Password" (user-secrets).
     /// </summary>
-    public static async Task SeedDevelopmentDataAsync(AppDbContext db)
+    public static async Task SeedDevelopmentDataAsync(UserManager<AppUser> userManager, IConfiguration configuration)
     {
-        if (await db.Users.AnyAsync())
+        var password = configuration["DemoUser:Password"];
+
+        if (string.IsNullOrWhiteSpace(password))
         {
+            return;
+        }
+
+        var existing = await userManager.FindByEmailAsync(DemoEmail);
+
+        if (existing is not null)
+        {
+            // Sørg for at demo-brugeren altid har adgangskoden fra user-secrets
+            if (!await userManager.CheckPasswordAsync(existing, password))
+            {
+                await userManager.RemovePasswordAsync(existing);
+                await userManager.AddPasswordAsync(existing, password);
+            }
+
             return;
         }
 
         var user = new AppUser
         {
-            Email = "demo@levelup.local",
+            UserName = DemoEmail,
+            Email = DemoEmail,
+            EmailConfirmed = true,
+            TwoFactorEnabled = true,
             DisplayName = "Demo",
-            PasswordHash = string.Empty,
             CoinBalance = 100,
             Settings = new UserSettings(),
             Character = new UserCharacter { CharacterName = "Demo-helten" },
         };
-        user.PasswordHash = new PasswordHasher<AppUser>().HashPassword(user, "Demo1234!");
 
-        db.Users.Add(user);
-        await db.SaveChangesAsync();
+        var result = await userManager.CreateAsync(user, password);
+
+        if (!result.Succeeded)
+        {
+            throw new InvalidOperationException(
+                "Kunne ikke oprette demo-bruger: " + string.Join(", ", result.Errors.Select(e => e.Description)));
+        }
     }
 }

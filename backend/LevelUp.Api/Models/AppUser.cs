@@ -1,18 +1,20 @@
+using Microsoft.AspNetCore.Identity;
+
 namespace LevelUp.Api.Models;
 
 /// <summary>
-/// En bruger af systemet. Bliver senere koblet på ASP.NET Core Identity
-/// (e-mailbekræftelse og 2FA).
+/// En bruger af systemet. Arver fra IdentityUser, som giver e-mail, password hash,
+/// telefonnummer, bekræftelse, 2FA og lockout. Gemmes i tabellen "app_user".
 /// </summary>
-public class AppUser
+public class AppUser : IdentityUser<int>
 {
-    public int Id { get; set; }
-    public required string Email { get; set; }
-    public required string PasswordHash { get; set; }
     public required string DisplayName { get; set; }
     public int TotalXp { get; set; }
     public int CoinBalance { get; set; }
     public DateTime CreatedAt { get; set; }
+
+    /// <summary>Hvordan brugeren modtager engangskoden ved login.</summary>
+    public TwoFactorMethod TwoFactorMethod { get; set; } = TwoFactorMethod.Email;
 
     public UserSettings? Settings { get; set; }
     public UserCharacter? Character { get; set; }
@@ -23,4 +25,10 @@ public class AppUser
     public List<Reminder> Reminders { get; set; } = [];
     public List<UserAchievement> Achievements { get; set; } = [];
     public List<UserChallenge> Challenges { get; set; } = [];
+}
+
+public enum TwoFactorMethod
+{
+    Email,
+    Sms,
 }

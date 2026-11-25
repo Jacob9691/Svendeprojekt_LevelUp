@@ -11,29 +11,30 @@ public class ExceptionHandler(IProblemDetailsService problemDetailsService) : IE
     public async ValueTask<bool> TryHandleAsync(
         HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
     {
-        var (status, title) = exception switch
-        {
-            NotFoundException => (StatusCodes.Status404NotFound, "Ikke fundet"),
-            BusinessRuleException => (StatusCodes.Status409Conflict, "Handlingen kan ikke udføres"),
-            _ => (0, string.Empty),
-        };
-
-        if (status == 0)
+        if (exception is not ApiException apiException)
         {
             return false; // Ukendte fejl håndteres af standard-handleren (500)
         }
 
-        httpContext.Response.StatusCode = status;
+        ProblemDetails problem = apiException is RequestValidationException validation
+            ? new ValidationProblemDetails(validation.Errors)
+            : new ProblemDetails();
+
+        problem.Status = apiException.StatusCode;
+        problem.Title = apiException.Title;
+        problem.Detail = apiException.Message;
+
+        if (apiException.Code is not null)
+        {
+            problem.Extensions["code"] = apiException.Code;
+        }
+
+        httpContext.Response.StatusCode = apiException.StatusCode;
 
         return await problemDetailsService.TryWriteAsync(new ProblemDetailsContext
         {
             HttpContext = httpContext,
-            ProblemDetails = new ProblemDetails
-            {
-                Status = status,
-                Title = title,
-                Detail = exception.Message,
-            },
+            ProblemDetails = problem,
             Exception = exception,
         });
     }

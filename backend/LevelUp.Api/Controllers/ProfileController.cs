@@ -1,6 +1,7 @@
 using LevelUp.Api.Dtos;
 using LevelUp.Api.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace LevelUp.Api.Controllers;
 
@@ -26,7 +27,23 @@ public class ProfileController(IProfileService profileService) : ControllerBase
     public async Task<ActionResult<SettingsDto>> GetSettings() =>
         await profileService.GetSettingsAsync();
 
+    /// <summary>Påmindelser, tidszone og 2FA-metode. SMS kræver et bekræftet telefonnummer.</summary>
     [HttpPut("settings")]
     public async Task<ActionResult<SettingsDto>> UpdateSettings(UpdateSettingsRequest request) =>
         await profileService.UpdateSettingsAsync(request);
+
+    /// <summary>Sender en SMS-kode til et nyt telefonnummer.</summary>
+    [HttpPost("phone")]
+    [EnableRateLimiting(RateLimitPolicies.Auth)]
+    public async Task<ActionResult<MessageResponse>> RequestPhoneChange(ChangePhoneRequest request)
+    {
+        await profileService.RequestPhoneChangeAsync(request);
+        return new MessageResponse("Der er sendt en kode til telefonnummeret.");
+    }
+
+    /// <summary>Bekræfter og gemmer det nye telefonnummer med koden fra SMS'en.</summary>
+    [HttpPost("phone/confirm")]
+    [EnableRateLimiting(RateLimitPolicies.Auth)]
+    public async Task<ActionResult<SettingsDto>> ConfirmPhoneChange(ConfirmPhoneRequest request) =>
+        await profileService.ConfirmPhoneChangeAsync(request);
 }

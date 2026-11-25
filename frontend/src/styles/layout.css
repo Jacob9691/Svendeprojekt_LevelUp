@@ -74,6 +74,15 @@
   background: var(--color-primary-soft);
 }
 
+.header__logout {
+  margin-left: auto;
+  border: 0;
+  background: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
 .header__stats {
   display: flex;
   align-items: center;
@@ -178,6 +187,22 @@
   font-size: 1rem;
 }
 
+.details {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 16px;
+  margin: 0;
+}
+
+.details dt {
+  color: var(--color-muted);
+}
+
+.details dd {
+  margin: 0;
+  font-weight: 500;
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -279,6 +304,13 @@
 
   .header__link {
     padding: 12px 14px;
+  }
+
+  .header__logout {
+    margin-left: 0;
+    border-top: 1px solid var(--color-border);
+    border-radius: 0;
+    margin-top: 4px;
   }
 
   .header__stats {

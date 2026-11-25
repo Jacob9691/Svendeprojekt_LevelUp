@@ -7,17 +7,17 @@ Gamificeret planlægningsplatform – svendeprøveprojekt.
 ```
 backend/             ASP.NET Core Web API (.NET 10) – LevelUp.slnx
 frontend/            React + TypeScript (Vite)
-docker-compose.yml   SQL Server 2022 til udvikling
+docker-compose.yml   SQL Server 2022 og Mailpit (test-mailserver) til udvikling
 ```
 
 ## Kom i gang
 
 Krav: .NET 10 SDK, Node.js 22+ og Docker Desktop.
 
-### Database (SQL Server i Docker)
+### Database og mail (Docker)
 
 1. Kopiér `.env.example` til `.env` og vælg en stærk adgangskode til `MSSQL_SA_PASSWORD`.
-2. Start databasen:
+2. Start SQL Server og Mailpit:
 
    ```bash
    docker compose up -d
@@ -26,10 +26,22 @@ Krav: .NET 10 SDK, Node.js 22+ og Docker Desktop.
    SQL Server kører på `localhost,14330` (port 14330, så den ikke konflikter med en lokal SQL Server på 1433).
    Data gemmes i Docker-volumen `levelup-sqldata` og overlever genstart.
 
-3. Gem connection string i user-secrets (samme adgangskode som i `.env`). Den ligger uden for repoet:
+   Mailpit fanger alle e-mails API'et sender (bekræftelses- og loginkoder). Læs dem på **http://localhost:8025**.
+
+3. Gem hemmelighederne i user-secrets. De ligger uden for repoet:
 
    ```bash
-   dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Server=localhost,14330;Database=LevelUp;User Id=sa;Password=<din-adgangskode>;TrustServerCertificate=True" --project backend/LevelUp.Api
+   dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Server=localhost,14330;Database=LevelUp;User Id=sa;Password=<adgangskode-fra-.env>;TrustServerCertificate=True" --project backend/LevelUp.Api
+   ```
+
+   ```bash
+   dotnet user-secrets set "Jwt:SigningKey" "<tilfældig tekst på mindst 32 tegn>" --project backend/LevelUp.Api
+   ```
+
+   Valgfrit – opretter en bekræftet demo-bruger (`demo@levelup.local`) med denne adgangskode:
+
+   ```bash
+   dotnet user-secrets set "DemoUser:Password" "<adgangskode>" --project backend/LevelUp.Api
    ```
 
 Når API'et starter i Development, kører det automatisk nye migrations og opretter demo-data.
@@ -55,12 +67,45 @@ npm run dev
 
 Frontenden kører på http://localhost:5173 og kalder API'et via `VITE_API_URL` i `frontend/.env.development`.
 
+Login i frontenden (`frontend/src/auth`):
+
+- `AuthProvider` gemmer access token og bruger i `localStorage`, så man forbliver logget ind ved genindlæsning,
+  og logger automatisk ud, når tokenet udløber.
+- axios sender tokenet med på alle kald (`api/client.ts`). Svarer API'et `401` på et kald med token, logges brugeren ud.
+- `RequireAuth` sender brugere uden login til `/login` og tilbage til den side, de prøvede at åbne, efter login.
+- Sider: `/opret` → `/bekraeft` (kode) → `/login` (adgangskode, derefter engangskode).
+
+## Login og sikkerhed
+
+Login sker i to trin med ASP.NET Core Identity og JWT:
+
+1. **Registrering** – `POST /api/auth/register` opretter kontoen og sender en 6-cifret kode via e-mail eller SMS.
+   Kontoen bekræftes med `POST /api/auth/confirm`. Man kan ikke logge ind før kontoen er bekræftet.
+2. **Login trin 1** – `POST /api/auth/login` tjekker e-mail og adgangskode og sender en engangskode
+   via brugerens valgte 2FA-metode. Svaret indeholder et kortlivet `twoFactorToken` (10 min).
+3. **Login trin 2** – `POST /api/auth/login/2fa` med `twoFactorToken` og koden returnerer et `accessToken` (JWT, 60 min).
+4. Alle andre endpoints kræver headeren `Authorization: Bearer <accessToken>`. I Swagger bruges knappen **Authorize**.
+
+Beskyttelse:
+
+- Adgangskoder hashes af Identity (PBKDF2). Krav: mindst 8 tegn med stort og lille bogstav og et tal.
+- Efter 5 forkerte forsøg (adgangskode eller kode) låses kontoen i 5 minutter.
+- `/api/auth/*` er begrænset til 10 kald pr. minut pr. IP-adresse (60 i Development).
+- Hver service filtrerer på bruger-id'et fra tokenet, så brugere kun kan se og ændre egne data.
+- SMS sendes endnu ikke rigtigt – koden skrives i API'ets log (`LoggingSmsSender`).
+
 ## API-endpoints
 
 Alle endpoints kan afprøves i Swagger UI eller med [LevelUp.Api.http](backend/LevelUp.Api/LevelUp.Api.http).
 
 | Metode | Endpoint | Beskrivelse |
 | --- | --- | --- |
+| POST | `/api/auth/register` | Opret konto – sender bekræftelseskode |
+| POST | `/api/auth/confirm` | Bekræft konto med kode |
+| POST | `/api/auth/confirm/resend` | Send ny bekræftelseskode |
+| POST | `/api/auth/login` | Login trin 1 – sender engangskode |
+| POST | `/api/auth/login/2fa` | Login trin 2 – returnerer JWT |
+| POST | `/api/auth/login/2fa/resend` | Send ny engangskode |
 | GET | `/api/tasks?from=&to=` | Brugerens opgaver, evt. for én uge |
 | GET | `/api/tasks/{id}` | Én opgave |
 | POST | `/api/tasks` | Opret opgave |
@@ -74,13 +119,14 @@ Alle endpoints kan afprøves i Swagger UI eller med [LevelUp.Api.http](backend/L
 | POST | `/api/inventory/{id}/unequip` | Tag genstand af |
 | GET / PUT | `/api/profile` | Profil, level, XP og points / skift visningsnavn |
 | GET | `/api/profile/transactions` | Historik over points |
-| GET / PUT | `/api/profile/settings` | Indstillinger for påmindelser |
+| GET / PUT | `/api/profile/settings` | Påmindelser, tidszone og 2FA-metode |
+| POST | `/api/profile/phone` | Send SMS-kode til nyt telefonnummer |
+| POST | `/api/profile/phone/confirm` | Bekræft og gem telefonnummer |
 
-Fejl returneres som ProblemDetails: `400` ved valideringsfejl, `404` hvis ressourcen ikke findes,
-og `409` hvis en regel brydes (f.eks. for få points eller opgaven allerede er belønnet).
-
-> **Midlertidigt:** Alle requests behandles som demo-brugeren (`DevCurrentUserService`).
-> Det udskiftes, når login og JWT sættes op.
+Fejl returneres som ProblemDetails: `400` ved valideringsfejl, `401` ved forkert login eller manglende token,
+`403` hvis kontoen er låst eller ikke bekræftet, `404` hvis ressourcen ikke findes, `409` hvis en regel brydes
+(f.eks. for få points), og `429` ved for mange kald. Login-fejl har et `code`-felt
+(`accountNotConfirmed`, `lockedOut`, `invalidCode`, `twoFactorTokenExpired`), som frontenden kan reagere på.
 
 ## Database og migrations
 

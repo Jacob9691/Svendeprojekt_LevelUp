@@ -7,8 +7,15 @@
 
   --color-primary: #6c5ce7;
   --color-primary-soft: #ece9ff;
+  --color-primary-hover: #5a4bd1;
   --color-xp: #22c55e;
   --color-coin: #f5b301;
+
+  --color-danger: #dc2626;
+  --color-danger-soft: #fef2f2;
+  --color-danger-text: #991b1b;
+  --color-success-soft: #f0fdf4;
+  --color-success-text: #166534;
 
   --color-dark: #1d1b33;
 

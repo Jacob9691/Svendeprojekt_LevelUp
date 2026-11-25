@@ -1,3 +1,5 @@
+using Microsoft.IdentityModel.JsonWebTokens;
+
 namespace LevelUp.Api.Services;
 
 /// <summary>Giver id'et på den bruger, der laver requesten.</summary>
@@ -7,10 +9,20 @@ public interface ICurrentUserService
 }
 
 /// <summary>
-/// Midlertidig implementering der altid returnerer demo-brugeren (id 1).
-/// Erstattes af en implementering der læser bruger-id'et fra JWT-tokenet.
+/// Læser bruger-id'et fra "sub"-claimet i JWT-tokenet. Alle services filtrerer på dette id,
+/// så en bruger kun kan se og ændre sine egne data.
 /// </summary>
-public class DevCurrentUserService : ICurrentUserService
+public class CurrentUserService(IHttpContextAccessor httpContextAccessor) : ICurrentUserService
 {
-    public int UserId => 1;
+    public int UserId
+    {
+        get
+        {
+            var sub = httpContextAccessor.HttpContext?.User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+
+            return int.TryParse(sub, out var userId)
+                ? userId
+                : throw new InvalidOperationException("Requesten har ingen logget ind bruger.");
+        }
+    }
 }

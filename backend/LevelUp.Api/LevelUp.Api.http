@@ -1,21 +1,74 @@
 @host = http://localhost:5105/api
+@email = test@example.com
+@password = Hemmelig123
 
 ### Health
 GET {{host}}/health
+
+### ---------- Registrering og login ----------
+# Koder til e-mail ses i Mailpit: http://localhost:8025 – SMS-koder står i API'ets log.
+
+### Opret konto
+POST {{host}}/auth/register
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}",
+  "displayName": "Test",
+  "confirmationMethod": "Email"
+}
+
+### Bekræft konto med koden fra mailen
+POST {{host}}/auth/confirm
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "code": "123456",
+  "method": "Email"
+}
+
+### Login trin 1 – sender engangskode
+# @name login
+POST {{host}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}"
+}
+
+### Login trin 2 – indsæt koden fra mailen
+# @name verify
+POST {{host}}/auth/login/2fa
+Content-Type: application/json
+
+{
+  "twoFactorToken": "{{login.response.body.$.twoFactorToken}}",
+  "code": "123456"
+}
+
+### Alle requests herunder bruger tokenet fra "Login trin 2"
+@token = {{verify.response.body.$.accessToken}}
 
 ### ---------- Opgaver ----------
 
 ### Hent alle opgaver
 GET {{host}}/tasks
+Authorization: Bearer {{token}}
 
 ### Hent opgaver for én uge
 GET {{host}}/tasks?from=2026-11-23&to=2026-11-30
+Authorization: Bearer {{token}}
 
 ### Hent én opgave
 GET {{host}}/tasks/1
+Authorization: Bearer {{token}}
 
 ### Opret opgave
 POST {{host}}/tasks
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
@@ -27,6 +80,7 @@ Content-Type: application/json
 
 ### Rediger opgave
 PUT {{host}}/tasks/1
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
@@ -38,36 +92,45 @@ Content-Type: application/json
 
 ### Gennemfør opgave (giver XP og points)
 POST {{host}}/tasks/1/complete
+Authorization: Bearer {{token}}
 
 ### Slet opgave
 DELETE {{host}}/tasks/1
+Authorization: Bearer {{token}}
 
 ### ---------- Shop ----------
 
 ### Hent genstande i shoppen
 GET {{host}}/shop/items
+Authorization: Bearer {{token}}
 
 ### Køb genstand
 POST {{host}}/shop/items/5/purchase
+Authorization: Bearer {{token}}
 
 ### ---------- Inventar ----------
 
 ### Hent inventar
 GET {{host}}/inventory
+Authorization: Bearer {{token}}
 
 ### Udstyr genstand
 POST {{host}}/inventory/1/equip
+Authorization: Bearer {{token}}
 
 ### Tag genstand af
 POST {{host}}/inventory/1/unequip
+Authorization: Bearer {{token}}
 
 ### ---------- Profil ----------
 
 ### Hent profil
 GET {{host}}/profile
+Authorization: Bearer {{token}}
 
 ### Opdater visningsnavn
 PUT {{host}}/profile
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
@@ -76,17 +139,39 @@ Content-Type: application/json
 
 ### Hent point-historik
 GET {{host}}/profile/transactions
+Authorization: Bearer {{token}}
 
 ### Hent indstillinger
 GET {{host}}/profile/settings
+Authorization: Bearer {{token}}
 
 ### Opdater indstillinger
 PUT {{host}}/profile/settings
+Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
   "emailEnabled": true,
   "smsEnabled": false,
-  "phoneNumber": null,
-  "timeZone": "Europe/Copenhagen"
+  "timeZone": "Europe/Copenhagen",
+  "twoFactorMethod": "Email"
+}
+
+### Send SMS-kode til nyt telefonnummer
+POST {{host}}/profile/phone
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "phoneNumber": "+4512345678"
+}
+
+### Bekræft telefonnummer med koden fra loggen
+POST {{host}}/profile/phone/confirm
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "phoneNumber": "+4512345678",
+  "code": "123456"
 }

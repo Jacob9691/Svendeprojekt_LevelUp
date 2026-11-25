@@ -1,21 +1,17 @@
 import { useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
+import { useAuth } from '../auth/useAuth'
 import { navItems } from '../navigation'
 import { CloseIcon, CoinIcon, MenuIcon } from './Icons'
 
-// Midlertidige data indtil brugeren hentes fra API'et.
-const placeholderUser = {
-  displayName: 'Spiller',
-  level: 1,
-  xp: 40,
-  xpForNextLevel: 100,
-  coins: 0,
-}
-
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false)
-  const { displayName, level, xp, xpForNextLevel, coins } = placeholderUser
-  const progress = Math.min(100, Math.round((xp / xpForNextLevel) * 100))
+  const { user, profile, signOut } = useAuth()
+
+  const displayName = profile?.displayName ?? user?.displayName ?? ''
+  const progress = profile
+    ? Math.min(100, Math.round((profile.xpIntoLevel / profile.xpForNextLevel) * 100))
+    : 0
 
   return (
     <header className="header">
@@ -40,30 +36,37 @@ export default function Header() {
               {label}
             </NavLink>
           ))}
+          <button type="button" className="header__link header__logout" onClick={signOut}>
+            Log ud
+          </button>
         </nav>
 
         <div className="header__stats">
-          <div className="level" title={`${xp}/${xpForNextLevel} XP`}>
-            <span className="level__badge">Lv {level}</span>
-            <div
-              className="level__bar"
-              role="progressbar"
-              aria-label="XP"
-              aria-valuemin={0}
-              aria-valuemax={xpForNextLevel}
-              aria-valuenow={xp}
-            >
-              <div className="level__fill" style={{ width: `${progress}%` }} />
-            </div>
-          </div>
+          {profile && (
+            <>
+              <div className="level" title={`${profile.xpIntoLevel}/${profile.xpForNextLevel} XP`}>
+                <span className="level__badge">Lv {profile.level}</span>
+                <div
+                  className="level__bar"
+                  role="progressbar"
+                  aria-label="XP"
+                  aria-valuemin={0}
+                  aria-valuemax={profile.xpForNextLevel}
+                  aria-valuenow={profile.xpIntoLevel}
+                >
+                  <div className="level__fill" style={{ width: `${progress}%` }} />
+                </div>
+              </div>
 
-          <div className="coins" title="Points">
-            <CoinIcon />
-            <span>{coins}</span>
-          </div>
+              <div className="coins" title="Points">
+                <CoinIcon />
+                <span>{profile.coinBalance}</span>
+              </div>
+            </>
+          )}
 
           <Link to="/profil" className="avatar" title={displayName}>
-            {displayName.charAt(0)}
+            {displayName.charAt(0).toUpperCase()}
           </Link>
 
           <button

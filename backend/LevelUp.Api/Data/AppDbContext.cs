@@ -1,0 +1,196 @@
+using System.Text.RegularExpressions;
+using LevelUp.Api.Models;
+using Microsoft.EntityFrameworkCore;
+
+namespace LevelUp.Api.Data;
+
+public partial class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
+{
+    private const string UtcNowSql = "SYSUTCDATETIME()";
+
+    public DbSet<AppUser> Users => Set<AppUser>();
+    public DbSet<UserSettings> UserSettings => Set<UserSettings>();
+    public DbSet<UserCharacter> UserCharacters => Set<UserCharacter>();
+    public DbSet<TaskItem> Tasks => Set<TaskItem>();
+    public DbSet<WeeklyAvailability> WeeklyAvailability => Set<WeeklyAvailability>();
+    public DbSet<PointTransaction> PointTransactions => Set<PointTransaction>();
+    public DbSet<ShopItem> ShopItems => Set<ShopItem>();
+    public DbSet<UserInventoryItem> UserInventory => Set<UserInventoryItem>();
+    public DbSet<Reminder> Reminders => Set<Reminder>();
+    public DbSet<Achievement> Achievements => Set<Achievement>();
+    public DbSet<UserAchievement> UserAchievements => Set<UserAchievement>();
+    public DbSet<Challenge> Challenges => Set<Challenge>();
+    public DbSet<UserChallenge> UserChallenges => Set<UserChallenge>();
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<AppUser>(user =>
+        {
+            user.Property(u => u.Email).HasMaxLength(255);
+            user.Property(u => u.PasswordHash).HasMaxLength(255);
+            user.Property(u => u.DisplayName).HasMaxLength(100);
+            user.Property(u => u.TotalXp).HasDefaultValue(0);
+            user.Property(u => u.CoinBalance).HasDefaultValue(0);
+            user.Property(u => u.CreatedAt).HasDefaultValueSql(UtcNowSql);
+            user.HasIndex(u => u.Email).IsUnique();
+
+            // 1-til-1 relationer (giver automatisk et unikt index på user_id)
+            user.HasOne(u => u.Settings)
+                .WithOne(s => s.User)
+                .HasForeignKey<UserSettings>(s => s.UserId);
+
+            user.HasOne(u => u.Character)
+                .WithOne(c => c.User)
+                .HasForeignKey<UserCharacter>(c => c.UserId);
+        });
+
+        modelBuilder.Entity<UserSettings>(settings =>
+        {
+            settings.Property(s => s.PhoneNumber).HasMaxLength(20);
+            settings.Property(s => s.TimeZone).HasMaxLength(50);
+        });
+
+        modelBuilder.Entity<UserCharacter>(character =>
+        {
+            character.Property(c => c.CharacterName).HasMaxLength(100);
+        });
+
+        modelBuilder.Entity<TaskItem>(task =>
+        {
+            task.Property(t => t.Title).HasMaxLength(150);
+            task.Property(t => t.Status).HasConversion<string>().HasMaxLength(30);
+            task.Property(t => t.CreatedAt).HasDefaultValueSql(UtcNowSql);
+
+            task.HasOne(t => t.User)
+                .WithMany(u => u.Tasks)
+                .HasForeignKey(t => t.UserId);
+
+            task.HasIndex(t => new { t.UserId, t.ScheduledStart });
+        });
+
+        modelBuilder.Entity<WeeklyAvailability>(availability =>
+        {
+            availability.HasOne(a => a.User)
+                .WithMany(u => u.WeeklyAvailability)
+                .HasForeignKey(a => a.UserId);
+        });
+
+        modelBuilder.Entity<PointTransaction>(transaction =>
+        {
+            transaction.Property(t => t.Type).HasConversion<string>().HasMaxLength(30);
+            transaction.Property(t => t.CreatedAt).HasDefaultValueSql(UtcNowSql);
+
+            transaction.HasOne(t => t.User)
+                .WithMany(u => u.PointTransactions)
+                .HasForeignKey(t => t.UserId);
+
+            // SQL Server tillader ikke to cascade-veje fra app_user til samme tabel
+            // (app_user → point_transaction og app_user → task → point_transaction).
+            // Derfor NO ACTION her – TaskService nulstiller referencen før en opgave slettes.
+            transaction.HasOne(t => t.Task)
+                .WithMany()
+                .HasForeignKey(t => t.TaskId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
+
+            transaction.HasOne(t => t.ShopItem)
+                .WithMany()
+                .HasForeignKey(t => t.ShopItemId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        modelBuilder.Entity<ShopItem>(item =>
+        {
+            item.Property(i => i.Name).HasMaxLength(100);
+            item.Property(i => i.Category).HasMaxLength(50);
+            item.HasData(SeedData.ShopItems);
+        });
+
+        modelBuilder.Entity<UserInventoryItem>(inventory =>
+        {
+            inventory.Property(i => i.PurchasedAt).HasDefaultValueSql(UtcNowSql);
+
+            inventory.HasOne(i => i.User)
+                .WithMany(u => u.Inventory)
+                .HasForeignKey(i => i.UserId);
+
+            // En bruger kan kun eje den samme genstand én gang
+            inventory.HasIndex(i => new { i.UserId, i.ShopItemId }).IsUnique();
+        });
+
+        modelBuilder.Entity<Reminder>(reminder =>
+        {
+            reminder.Property(r => r.Channel).HasConversion<string>().HasMaxLength(20);
+            reminder.Property(r => r.Status).HasConversion<string>().HasMaxLength(30);
+
+            reminder.HasOne(r => r.User)
+                .WithMany(u => u.Reminders)
+                .HasForeignKey(r => r.UserId);
+
+            // Samme grund som ved point_transaction – TaskService sletter påmindelserne selv
+            reminder.HasOne(r => r.Task)
+                .WithMany()
+                .HasForeignKey(r => r.TaskId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
+
+            reminder.HasIndex(r => new { r.Status, r.ScheduledAt });
+        });
+
+        modelBuilder.Entity<Achievement>(achievement =>
+        {
+            achievement.Property(a => a.Name).HasMaxLength(100);
+        });
+
+        modelBuilder.Entity<UserAchievement>(userAchievement =>
+        {
+            userAchievement.Property(a => a.UnlockedAt).HasDefaultValueSql(UtcNowSql);
+
+            userAchievement.HasOne(a => a.User)
+                .WithMany(u => u.Achievements)
+                .HasForeignKey(a => a.UserId);
+        });
+
+        modelBuilder.Entity<Challenge>(challenge =>
+        {
+            challenge.Property(c => c.Name).HasMaxLength(100);
+            challenge.Property(c => c.RewardCoins).HasDefaultValue(0);
+            challenge.Property(c => c.RewardXp).HasDefaultValue(0);
+        });
+
+        modelBuilder.Entity<UserChallenge>(userChallenge =>
+        {
+            userChallenge.Property(c => c.Progress).HasDefaultValue(0);
+
+            userChallenge.HasOne(c => c.User)
+                .WithMany(u => u.Challenges)
+                .HasForeignKey(c => c.UserId);
+        });
+
+        ApplySnakeCaseNames(modelBuilder);
+
+        // Klasser hvis navn ikke matcher tabellen i ERD'en
+        modelBuilder.Entity<TaskItem>().ToTable("task");
+        modelBuilder.Entity<UserInventoryItem>().ToTable("user_inventory");
+    }
+
+    /// <summary>
+    /// Navngiver tabeller og kolonner i snake_case som i ERD'en (AppUser → app_user, TotalXp → total_xp).
+    /// </summary>
+    private static void ApplySnakeCaseNames(ModelBuilder modelBuilder)
+    {
+        foreach (var entity in modelBuilder.Model.GetEntityTypes())
+        {
+            entity.SetTableName(ToSnakeCase(entity.ClrType.Name));
+
+            foreach (var property in entity.GetProperties())
+            {
+                property.SetColumnName(ToSnakeCase(property.Name));
+            }
+        }
+    }
+
+    private static string ToSnakeCase(string name) =>
+        PascalCaseBoundary().Replace(name, "$1_$2").ToLowerInvariant();
+
+    [GeneratedRegex("([a-z0-9])([A-Z])")]
+    private static partial Regex PascalCaseBoundary();
+}

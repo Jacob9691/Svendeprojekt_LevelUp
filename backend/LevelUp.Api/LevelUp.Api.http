@@ -1,6 +1,92 @@
-@LevelUp.Api_HostAddress = http://localhost:5105
+@host = http://localhost:5105/api
 
-GET {{LevelUp.Api_HostAddress}}/api/health
-Accept: application/json
+### Health
+GET {{host}}/health
 
-###
+### ---------- Opgaver ----------
+
+### Hent alle opgaver
+GET {{host}}/tasks
+
+### Hent opgaver for én uge
+GET {{host}}/tasks?from=2026-11-23&to=2026-11-30
+
+### Hent én opgave
+GET {{host}}/tasks/1
+
+### Opret opgave
+POST {{host}}/tasks
+Content-Type: application/json
+
+{
+  "title": "Gå en tur",
+  "description": "30 minutter i frisk luft",
+  "scheduledStart": "2026-11-25T09:00:00",
+  "scheduledEnd": "2026-11-25T09:30:00"
+}
+
+### Rediger opgave
+PUT {{host}}/tasks/1
+Content-Type: application/json
+
+{
+  "title": "Gå en lang tur",
+  "description": "60 minutter i frisk luft",
+  "scheduledStart": "2026-11-25T09:00:00",
+  "scheduledEnd": "2026-11-25T10:00:00"
+}
+
+### Gennemfør opgave (giver XP og points)
+POST {{host}}/tasks/1/complete
+
+### Slet opgave
+DELETE {{host}}/tasks/1
+
+### ---------- Shop ----------
+
+### Hent genstande i shoppen
+GET {{host}}/shop/items
+
+### Køb genstand
+POST {{host}}/shop/items/5/purchase
+
+### ---------- Inventar ----------
+
+### Hent inventar
+GET {{host}}/inventory
+
+### Udstyr genstand
+POST {{host}}/inventory/1/equip
+
+### Tag genstand af
+POST {{host}}/inventory/1/unequip
+
+### ---------- Profil ----------
+
+### Hent profil
+GET {{host}}/profile
+
+### Opdater visningsnavn
+PUT {{host}}/profile
+Content-Type: application/json
+
+{
+  "displayName": "Jacob"
+}
+
+### Hent point-historik
+GET {{host}}/profile/transactions
+
+### Hent indstillinger
+GET {{host}}/profile/settings
+
+### Opdater indstillinger
+PUT {{host}}/profile/settings
+Content-Type: application/json
+
+{
+  "emailEnabled": true,
+  "smsEnabled": false,
+  "phoneNumber": null,
+  "timeZone": "Europe/Copenhagen"
+}

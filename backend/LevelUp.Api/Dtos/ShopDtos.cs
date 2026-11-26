@@ -8,7 +8,7 @@ public record ShopItemDto(
     string Category,
     bool Owned);
 
-public record PurchaseResponse(InventoryItemDto Item, int CoinBalance);
+public record PurchaseResponse(InventoryItemDto Item, int CoinBalance, List<AchievementDto> UnlockedAchievements);
 
 public record InventoryItemDto(
     int Id,

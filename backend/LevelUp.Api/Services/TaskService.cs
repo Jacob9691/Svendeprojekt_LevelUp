@@ -10,13 +10,21 @@ public interface ITaskService
 {
     Task<List<TaskDto>> GetTasksAsync(DateTime? from, DateTime? to);
     Task<TaskDto> GetTaskAsync(int id);
-    Task<TaskDto> CreateTaskAsync(SaveTaskRequest request);
+    /// <summary>Opretter opgaven – eller én opgave pr. gentagelse. Returnerer den første.</summary>
+    Task<TaskDto> CreateTaskAsync(CreateTaskRequest request);
     Task<TaskDto> UpdateTaskAsync(int id, SaveTaskRequest request);
-    Task DeleteTaskAsync(int id);
+    /// <summary>
+    /// Sletter opgaven. Er includeFollowing sand, slettes også senere, ikke-gennemførte opgaver i samme serie.
+    /// </summary>
+    Task DeleteTaskAsync(int id, bool includeFollowing = false);
     Task<CompleteTaskResponse> CompleteTaskAsync(int id);
 }
 
-public class TaskService(AppDbContext db, ICurrentUserService currentUser) : ITaskService
+public class TaskService(
+    AppDbContext db,
+    ICurrentUserService currentUser,
+    IChallengeService challengeService,
+    IAchievementService achievementService) : ITaskService
 {
     public async Task<List<TaskDto>> GetTasksAsync(DateTime? from, DateTime? to)
     {
@@ -39,21 +47,33 @@ public class TaskService(AppDbContext db, ICurrentUserService currentUser) : ITa
     public async Task<TaskDto> GetTaskAsync(int id) =>
         TaskDto.FromEntity(await FindOwnTaskAsync(id));
 
-    public async Task<TaskDto> CreateTaskAsync(SaveTaskRequest request)
+    public async Task<TaskDto> CreateTaskAsync(CreateTaskRequest request)
     {
-        var task = new TaskItem
-        {
-            UserId = currentUser.UserId,
-            Title = request.Title.Trim(),
-            Description = request.Description,
-            ScheduledStart = request.ScheduledStart!.Value,
-            ScheduledEnd = request.ScheduledEnd,
-        };
+        var start = request.ScheduledStart!.Value;
+        var occurrences = request.Repeat is null
+            ? [start]
+            : Recurrence.Until(start, request.Repeat.Value, request.RepeatUntil!.Value, nameof(request.RepeatUntil));
 
-        db.Tasks.Add(task);
+        // Samme varighed for alle gentagelser
+        var duration = request.ScheduledEnd - start;
+        var seriesId = occurrences.Count > 1 ? Guid.NewGuid() : (Guid?)null;
+
+        var tasks = occurrences
+            .Select(occurrenceStart => new TaskItem
+            {
+                UserId = currentUser.UserId,
+                Title = request.Title.Trim(),
+                Description = request.Description,
+                ScheduledStart = occurrenceStart,
+                ScheduledEnd = occurrenceStart + duration,
+                SeriesId = seriesId,
+            })
+            .ToList();
+
+        db.Tasks.AddRange(tasks);
         await db.SaveChangesAsync();
 
-        return TaskDto.FromEntity(task);
+        return TaskDto.FromEntity(tasks[0]);
     }
 
     public async Task<TaskDto> UpdateTaskAsync(int id, SaveTaskRequest request)
@@ -70,24 +90,53 @@ public class TaskService(AppDbContext db, ICurrentUserService currentUser) : ITa
         return TaskDto.FromEntity(task);
     }
 
-    public async Task DeleteTaskAsync(int id)
+    public async Task DeleteTaskAsync(int id, bool includeFollowing = false)
     {
         var task = await FindOwnTaskAsync(id);
+        var ids = new List<int> { task.Id };
+
+        // "Denne og fremtidige": senere gentagelser i serien. Gennemførte bevares som historik.
+        if (includeFollowing && task.SeriesId is not null)
+        {
+            ids.AddRange(await db.Tasks
+                .Where(t => t.UserId == currentUser.UserId
+                            && t.SeriesId == task.SeriesId
+                            && t.Id != task.Id
+                            && t.ScheduledStart >= task.ScheduledStart
+                            && t.Status != TaskItemStatus.Completed)
+                .Select(t => t.Id)
+                .ToListAsync());
+        }
+
+        await DeleteTasksAsync(db, ids);
+    }
+
+    /// <summary>
+    /// Sletter opgaverne i én transaktion. Bruges også når en udfordring opgives.
+    /// Kalderen skal have tjekket at opgaverne tilhører brugeren.
+    /// </summary>
+    public static async Task DeleteTasksAsync(AppDbContext db, List<int> ids)
+    {
+        if (ids.Count == 0)
+        {
+            return;
+        }
 
         await using var transaction = await db.Database.BeginTransactionAsync();
 
         // Point-historikken bevares, men mister referencen til opgaven
         await db.PointTransactions
-            .Where(t => t.TaskId == task.Id)
+            .Where(t => t.TaskId != null && ids.Contains(t.TaskId.Value))
             .ExecuteUpdateAsync(s => s.SetProperty(t => t.TaskId, (int?)null));
 
         // Påmindelser for en slettet opgave giver ikke mening
         await db.Reminders
-            .Where(r => r.TaskId == task.Id)
+            .Where(r => r.TaskId != null && ids.Contains(r.TaskId.Value))
             .ExecuteDeleteAsync();
 
-        db.Tasks.Remove(task);
-        await db.SaveChangesAsync();
+        await db.Tasks
+            .Where(t => ids.Contains(t.Id))
+            .ExecuteDeleteAsync();
 
         await transaction.CommitAsync();
     }
@@ -119,8 +168,13 @@ public class TaskService(AppDbContext db, ICurrentUserService currentUser) : ITa
             Type = PointTransactionType.TaskReward,
         });
 
+        // Tæller udfordringen op (og giver bonus, hvis den bliver færdig) i samme SaveChanges
+        var challenge = await challengeService.RegisterCompletionAsync(task, user);
+
         await db.SaveChangesAsync();
 
+        // Achievements tjekkes efter gem, så de nye tal er med
+        var unlocked = await achievementService.UnlockNewAsync();
         var levelAfter = LevelCalculator.FromTotalXp(user.TotalXp).Level;
 
         return new CompleteTaskResponse(
@@ -130,7 +184,9 @@ public class TaskService(AppDbContext db, ICurrentUserService currentUser) : ITa
             user.TotalXp,
             user.CoinBalance,
             levelAfter,
-            levelAfter > levelBefore);
+            levelAfter > levelBefore,
+            challenge,
+            unlocked);
     }
 
     /// <summary>Finder en opgave, men kun hvis den tilhører den aktuelle bruger.</summary>

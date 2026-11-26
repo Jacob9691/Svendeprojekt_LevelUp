@@ -75,6 +75,7 @@ public class ProfileService(
 
         settings.EmailEnabled = request.EmailEnabled;
         settings.SmsEnabled = request.SmsEnabled;
+        settings.ReminderMinutesBefore = request.ReminderMinutesBefore;
         settings.TimeZone = request.TimeZone;
         user.TwoFactorMethod = request.TwoFactorMethod;
 
@@ -136,6 +137,7 @@ public class ProfileService(
     private static SettingsDto ToSettingsDto(AppUser user, UserSettings settings) => new(
         settings.EmailEnabled,
         settings.SmsEnabled,
+        settings.ReminderMinutesBefore,
         settings.TimeZone,
         user.TwoFactorMethod,
         user.EmailConfirmed,

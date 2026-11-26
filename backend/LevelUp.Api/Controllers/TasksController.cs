@@ -17,21 +17,27 @@ public class TasksController(ITaskService taskService) : ControllerBase
     public async Task<ActionResult<TaskDto>> GetTask(int id) =>
         await taskService.GetTaskAsync(id);
 
+    /// <summary>
+    /// Opretter en opgave. Med "repeat" og "repeatUntil" oprettes én opgave pr. gentagelse i en serie,
+    /// og den første returneres.
+    /// </summary>
     [HttpPost]
-    public async Task<ActionResult<TaskDto>> CreateTask(SaveTaskRequest request)
+    public async Task<ActionResult<TaskDto>> CreateTask(CreateTaskRequest request)
     {
         var task = await taskService.CreateTaskAsync(request);
         return CreatedAtAction(nameof(GetTask), new { id = task.Id }, task);
     }
 
+    /// <summary>Redigerer én opgave – også hvis den er del af en serie.</summary>
     [HttpPut("{id:int}")]
     public async Task<ActionResult<TaskDto>> UpdateTask(int id, SaveTaskRequest request) =>
         await taskService.UpdateTaskAsync(id, request);
 
+    /// <summary>Sletter opgaven. Med ?following=true slettes også senere, ikke-gennemførte opgaver i serien.</summary>
     [HttpDelete("{id:int}")]
-    public async Task<IActionResult> DeleteTask(int id)
+    public async Task<IActionResult> DeleteTask(int id, [FromQuery] bool following = false)
     {
-        await taskService.DeleteTaskAsync(id);
+        await taskService.DeleteTaskAsync(id, following);
         return NoContent();
     }
 

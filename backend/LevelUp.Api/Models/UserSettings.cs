@@ -12,5 +12,8 @@ public class UserSettings
     public bool SmsEnabled { get; set; }
     public string TimeZone { get; set; } = "Europe/Copenhagen";
 
+    /// <summary>Hvor mange minutter før en opgave påmindelsen sendes.</summary>
+    public int ReminderMinutesBefore { get; set; } = 30;
+
     public AppUser? User { get; set; }
 }

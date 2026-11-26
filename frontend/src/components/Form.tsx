@@ -1,4 +1,11 @@
-import { useId, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode } from 'react'
+import {
+  useId,
+  type ButtonHTMLAttributes,
+  type InputHTMLAttributes,
+  type ReactNode,
+  type SelectHTMLAttributes,
+  type TextareaHTMLAttributes,
+} from 'react'
 
 interface TextFieldProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string
@@ -37,6 +44,49 @@ export function TextField({ label, error, hint, className, ...inputProps }: Text
   )
 }
 
+interface TextAreaFieldProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
+  label: string
+  error?: string
+}
+
+export function TextAreaField({ label, error, ...textareaProps }: TextAreaFieldProps) {
+  const id = useId()
+
+  return (
+    <div className="mb-3">
+      <label htmlFor={id} className="form-label">
+        {label}
+      </label>
+      <textarea id={id} className={`form-control${error ? ' is-invalid' : ''}`} {...textareaProps} />
+      {error && <div className="invalid-feedback">{error}</div>}
+    </div>
+  )
+}
+
+interface SelectFieldProps extends SelectHTMLAttributes<HTMLSelectElement> {
+  label: string
+  options: { value: string; label: string }[]
+}
+
+export function SelectField({ label, options, ...selectProps }: SelectFieldProps) {
+  const id = useId()
+
+  return (
+    <div className="mb-3">
+      <label htmlFor={id} className="form-label">
+        {label}
+      </label>
+      <select id={id} className="form-select" {...selectProps}>
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+    </div>
+  )
+}
+
 /** Felt til 6-cifrede engangskoder. Browsere på mobil kan udfylde koden fra SMS'en. */
 export function CodeField(props: Omit<TextFieldProps, 'label'> & { label?: string }) {
   return (
@@ -57,11 +107,12 @@ interface RadioGroupProps<T extends string> {
   legend: string
   name: string
   value: T
-  options: { value: T; label: string }[]
+  options: { value: T; label: string; disabled?: boolean }[]
   onChange: (value: T) => void
+  hint?: string
 }
 
-export function RadioGroup<T extends string>({ legend, name, value, options, onChange }: RadioGroupProps<T>) {
+export function RadioGroup<T extends string>({ legend, name, value, options, onChange, hint }: RadioGroupProps<T>) {
   return (
     <fieldset className="mb-3">
       <legend className="form-label fs-6">{legend}</legend>
@@ -73,6 +124,7 @@ export function RadioGroup<T extends string>({ legend, name, value, options, onC
             type="radio"
             name={name}
             checked={value === option.value}
+            disabled={option.disabled}
             onChange={() => onChange(option.value)}
           />
           <label htmlFor={`${name}-${option.value}`} className="form-check-label">
@@ -80,7 +132,39 @@ export function RadioGroup<T extends string>({ legend, name, value, options, onC
           </label>
         </div>
       ))}
+      {hint && <div className="form-text">{hint}</div>}
     </fieldset>
+  )
+}
+
+interface SwitchFieldProps {
+  label: string
+  checked: boolean
+  onChange: (checked: boolean) => void
+  disabled?: boolean
+  hint?: string
+}
+
+/** Bootstrap-kontakt (tænd/sluk). */
+export function SwitchField({ label, checked, onChange, disabled, hint }: SwitchFieldProps) {
+  const id = useId()
+
+  return (
+    <div className="form-check form-switch mb-2">
+      <input
+        id={id}
+        className="form-check-input"
+        type="checkbox"
+        role="switch"
+        checked={checked}
+        disabled={disabled}
+        onChange={(e) => onChange(e.target.checked)}
+      />
+      <label htmlFor={id} className="form-check-label">
+        {label}
+      </label>
+      {hint && <div className="form-text mt-0">{hint}</div>}
+    </div>
   )
 }
 
@@ -95,7 +179,7 @@ export function Alert({ kind = 'error', children }: { kind?: 'error' | 'info' | 
 }
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'outline-secondary' | 'link'
+  variant?: 'primary' | 'success' | 'danger' | 'outline-danger' | 'outline-secondary' | 'link'
   loading?: boolean
 }
 

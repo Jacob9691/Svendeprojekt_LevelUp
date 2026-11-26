@@ -12,7 +12,10 @@ public interface IShopService
     Task<PurchaseResponse> PurchaseAsync(int shopItemId);
 }
 
-public class ShopService(AppDbContext db, ICurrentUserService currentUser) : IShopService
+public class ShopService(
+    AppDbContext db,
+    ICurrentUserService currentUser,
+    IAchievementService achievementService) : IShopService
 {
     public async Task<List<ShopItemDto>> GetItemsAsync()
     {
@@ -71,10 +74,12 @@ public class ShopService(AppDbContext db, ICurrentUserService currentUser) : ISh
 
         await db.SaveChangesAsync();
 
+        var unlocked = await achievementService.UnlockNewAsync();
+
         var dto = new InventoryItemDto(
             inventoryItem.Id, item.Id, item.Name, item.Description, item.Category,
             inventoryItem.IsEquipped, inventoryItem.PurchasedAt);
 
-        return new PurchaseResponse(dto, user.CoinBalance);
+        return new PurchaseResponse(dto, user.CoinBalance, unlocked);
     }
 }

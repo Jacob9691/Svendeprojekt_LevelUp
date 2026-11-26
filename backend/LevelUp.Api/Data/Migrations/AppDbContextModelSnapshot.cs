@@ -45,9 +45,97 @@ namespace LevelUp.Api.Data.Migrations
                         .HasColumnType("int")
                         .HasColumnName("required_count");
 
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)")
+                        .HasColumnName("type");
+
                     b.HasKey("Id");
 
                     b.ToTable("achievement");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Description = "Gennemfør din første opgave.",
+                            Name = "Første skridt",
+                            RequiredCount = 1,
+                            Type = "TasksCompleted"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Description = "Gennemfør 10 opgaver.",
+                            Name = "Godt i gang",
+                            RequiredCount = 10,
+                            Type = "TasksCompleted"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Description = "Gennemfør 50 opgaver.",
+                            Name = "Opgavemester",
+                            RequiredCount = 50,
+                            Type = "TasksCompleted"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Description = "Nå level 5.",
+                            Name = "Level 5",
+                            RequiredCount = 5,
+                            Type = "Level"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Description = "Nå level 10.",
+                            Name = "Level 10",
+                            RequiredCount = 10,
+                            Type = "Level"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Description = "Nå level 20.",
+                            Name = "Level 20",
+                            RequiredCount = 20,
+                            Type = "Level"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Description = "Køb din første genstand i shoppen.",
+                            Name = "Første køb",
+                            RequiredCount = 1,
+                            Type = "ItemsBought"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Description = "Køb 5 genstande.",
+                            Name = "Samler",
+                            RequiredCount = 5,
+                            Type = "ItemsBought"
+                        },
+                        new
+                        {
+                            Id = 9,
+                            Description = "Gennemfør din første udfordring.",
+                            Name = "Udfordrer",
+                            RequiredCount = 1,
+                            Type = "ChallengesCompleted"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            Description = "Gennemfør 3 udfordringer.",
+                            Name = "Udholdende",
+                            RequiredCount = 3,
+                            Type = "ChallengesCompleted"
+                        });
                 });
 
             modelBuilder.Entity("LevelUp.Api.Models.AppUser", b =>
@@ -192,6 +280,16 @@ namespace LevelUp.Api.Data.Migrations
                         .HasColumnType("nvarchar(100)")
                         .HasColumnName("name");
 
+                    b.Property<string>("Repeat")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("repeat");
+
+                    b.Property<int>("RequiredCount")
+                        .HasColumnType("int")
+                        .HasColumnName("required_count");
+
                     b.Property<int>("RewardCoins")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
@@ -204,9 +302,61 @@ namespace LevelUp.Api.Data.Migrations
                         .HasDefaultValue(0)
                         .HasColumnName("reward_xp");
 
+                    b.Property<string>("TaskTitle")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)")
+                        .HasColumnName("task_title");
+
                     b.HasKey("Id");
 
                     b.ToTable("challenge");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Description = "Gå en tur hver dag i en uge.",
+                            Name = "7 dages gåtur",
+                            Repeat = "Daily",
+                            RequiredCount = 7,
+                            RewardCoins = 50,
+                            RewardXp = 100,
+                            TaskTitle = "Gå en tur"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Description = "Læs 20 minutter hver hverdag i to uger.",
+                            Name = "Læseuge",
+                            Repeat = "Weekdays",
+                            RequiredCount = 10,
+                            RewardCoins = 75,
+                            RewardXp = 150,
+                            TaskTitle = "Læs 20 minutter"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Description = "Gør rent én gang om ugen i en måned.",
+                            Name = "Rent hjem",
+                            Repeat = "Weekly",
+                            RequiredCount = 4,
+                            RewardCoins = 60,
+                            RewardXp = 120,
+                            TaskTitle = "Gør rent"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Description = "Lav din morgenrutine hver dag i 14 dage.",
+                            Name = "Morgenrutine",
+                            Repeat = "Daily",
+                            RequiredCount = 14,
+                            RewardCoins = 120,
+                            RewardXp = 250,
+                            TaskTitle = "Morgenrutine"
+                        });
                 });
 
             modelBuilder.Entity("LevelUp.Api.Models.PointTransaction", b =>
@@ -420,6 +570,10 @@ namespace LevelUp.Api.Data.Migrations
                         .HasColumnType("datetime2")
                         .HasColumnName("scheduled_start");
 
+                    b.Property<Guid?>("SeriesId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("series_id");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(30)
@@ -439,6 +593,8 @@ namespace LevelUp.Api.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("UserId", "ScheduledStart");
+
+                    b.HasIndex("UserId", "SeriesId");
 
                     b.ToTable("task", (string)null);
                 });
@@ -470,7 +626,8 @@ namespace LevelUp.Api.Data.Migrations
 
                     b.HasIndex("AchievementId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId", "AchievementId")
+                        .IsUnique();
 
                     b.ToTable("user_achievement");
                 });
@@ -498,6 +655,16 @@ namespace LevelUp.Api.Data.Migrations
                         .HasDefaultValue(0)
                         .HasColumnName("progress");
 
+                    b.Property<Guid>("SeriesId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("series_id");
+
+                    b.Property<DateTime>("StartedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("started_at")
+                        .HasDefaultValueSql("SYSUTCDATETIME()");
+
                     b.Property<int>("UserId")
                         .HasColumnType("int")
                         .HasColumnName("user_id");
@@ -506,7 +673,10 @@ namespace LevelUp.Api.Data.Migrations
 
                     b.HasIndex("ChallengeId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId", "ChallengeId")
+                        .IsUnique();
+
+                    b.HasIndex("UserId", "SeriesId");
 
                     b.ToTable("user_challenge");
                 });
@@ -590,6 +760,10 @@ namespace LevelUp.Api.Data.Migrations
                     b.Property<bool>("EmailEnabled")
                         .HasColumnType("bit")
                         .HasColumnName("email_enabled");
+
+                    b.Property<int>("ReminderMinutesBefore")
+                        .HasColumnType("int")
+                        .HasColumnName("reminder_minutes_before");
 
                     b.Property<bool>("SmsEnabled")
                         .HasColumnType("bit")

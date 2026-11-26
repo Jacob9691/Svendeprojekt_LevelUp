@@ -1,5 +1,4 @@
 import { Outlet, useLocation } from 'react-router-dom'
-import Footer from '../components/Footer'
 import Header from '../components/Header'
 import { navItems } from '../navigation'
 
@@ -15,7 +14,6 @@ export default function AppLayout() {
         {title && <h1 className="h3 mb-4">{title}</h1>}
         <Outlet />
       </main>
-      <Footer />
     </div>
   )
 }

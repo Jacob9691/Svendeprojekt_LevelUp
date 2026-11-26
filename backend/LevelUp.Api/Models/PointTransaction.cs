@@ -24,4 +24,5 @@ public enum PointTransactionType
 {
     TaskReward,
     Purchase,
+    ChallengeReward,
 }

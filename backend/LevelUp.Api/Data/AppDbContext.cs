@@ -77,6 +77,7 @@ public partial class AppDbContext(DbContextOptions<AppDbContext> options)
                 .HasForeignKey(t => t.UserId);
 
             task.HasIndex(t => new { t.UserId, t.ScheduledStart });
+            task.HasIndex(t => new { t.UserId, t.SeriesId });
         });
 
         modelBuilder.Entity<WeeklyAvailability>(availability =>
@@ -149,6 +150,8 @@ public partial class AppDbContext(DbContextOptions<AppDbContext> options)
         modelBuilder.Entity<Achievement>(achievement =>
         {
             achievement.Property(a => a.Name).HasMaxLength(100);
+            achievement.Property(a => a.Type).HasConversion<string>().HasMaxLength(30);
+            achievement.HasData(SeedData.Achievements);
         });
 
         modelBuilder.Entity<UserAchievement>(userAchievement =>
@@ -158,22 +161,33 @@ public partial class AppDbContext(DbContextOptions<AppDbContext> options)
             userAchievement.HasOne(a => a.User)
                 .WithMany(u => u.Achievements)
                 .HasForeignKey(a => a.UserId);
+
+            // Et achievement kan kun låses op én gang pr. bruger
+            userAchievement.HasIndex(a => new { a.UserId, a.AchievementId }).IsUnique();
         });
 
         modelBuilder.Entity<Challenge>(challenge =>
         {
             challenge.Property(c => c.Name).HasMaxLength(100);
+            challenge.Property(c => c.TaskTitle).HasMaxLength(150);
+            challenge.Property(c => c.Repeat).HasConversion<string>().HasMaxLength(20);
             challenge.Property(c => c.RewardCoins).HasDefaultValue(0);
             challenge.Property(c => c.RewardXp).HasDefaultValue(0);
+            challenge.HasData(SeedData.Challenges);
         });
 
         modelBuilder.Entity<UserChallenge>(userChallenge =>
         {
             userChallenge.Property(c => c.Progress).HasDefaultValue(0);
+            userChallenge.Property(c => c.StartedAt).HasDefaultValueSql(UtcNowSql);
 
             userChallenge.HasOne(c => c.User)
                 .WithMany(u => u.Challenges)
                 .HasForeignKey(c => c.UserId);
+
+            // En udfordring kan kun tages én gang pr. bruger
+            userChallenge.HasIndex(c => new { c.UserId, c.ChallengeId }).IsUnique();
+            userChallenge.HasIndex(c => new { c.UserId, c.SeriesId });
         });
 
         ApplySnakeCaseNames(modelBuilder);

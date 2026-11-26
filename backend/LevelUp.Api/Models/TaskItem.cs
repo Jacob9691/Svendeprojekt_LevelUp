@@ -16,6 +16,12 @@ public class TaskItem
     public DateTime? CompletedAt { get; set; }
     public DateTime CreatedAt { get; set; }
 
+    /// <summary>
+    /// Fælles id for opgaver der er oprettet som en gentagende serie. Hver gentagelse er sin egen opgave,
+    /// så den kan gennemføres og belønnes for sig. Null for enkeltstående opgaver.
+    /// </summary>
+    public Guid? SeriesId { get; set; }
+
     public AppUser? User { get; set; }
 }
 

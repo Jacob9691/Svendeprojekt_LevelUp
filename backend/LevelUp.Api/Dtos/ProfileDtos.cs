@@ -35,6 +35,7 @@ public record PointTransactionDto(
 public record SettingsDto(
     bool EmailEnabled,
     bool SmsEnabled,
+    int ReminderMinutesBefore,
     string TimeZone,
     TwoFactorMethod TwoFactorMethod,
     bool EmailConfirmed,
@@ -43,8 +44,16 @@ public record SettingsDto(
 
 public class UpdateSettingsRequest : IValidatableObject
 {
+    /// <summary>Send påmindelser på e-mail.</summary>
     public bool EmailEnabled { get; init; }
+
+    /// <summary>Send påmindelser på SMS. Kræver et bekræftet telefonnummer.</summary>
     public bool SmsEnabled { get; init; }
+
+    /// <summary>Hvor mange minutter før en opgave påmindelsen sendes (5 minutter til 1 døgn).</summary>
+    [Display(Name = "Tidspunktet for påmindelser")]
+    [Range(5, 1440, ErrorMessage = ValidationMessages.Range)]
+    public int ReminderMinutesBefore { get; init; } = 30;
 
     [Display(Name = "Tidszone")]
     [Required(ErrorMessage = Required), MaxLength(50, ErrorMessage = MaxLength)]

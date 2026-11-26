@@ -108,10 +108,14 @@ Alle endpoints kan afprøves i Swagger UI eller med [LevelUp.Api.http](backend/L
 | POST | `/api/auth/login/2fa/resend` | Send ny engangskode |
 | GET | `/api/tasks?from=&to=` | Brugerens opgaver, evt. for én uge |
 | GET | `/api/tasks/{id}` | Én opgave |
-| POST | `/api/tasks` | Opret opgave |
+| POST | `/api/tasks` | Opret opgave – med `repeat` og `repeatUntil` oprettes en gentagende serie |
 | PUT | `/api/tasks/{id}` | Rediger opgave |
-| DELETE | `/api/tasks/{id}` | Slet opgave |
+| DELETE | `/api/tasks/{id}?following=` | Slet opgave – med `following=true` også senere opgaver i serien |
 | POST | `/api/tasks/{id}/complete` | Gennemfør opgave – giver XP og points |
+| GET | `/api/achievements` | Alle achievements med fremskridt (låser nye op, hvis de er nået) |
+| GET | `/api/challenges` | Udfordringer og brugerens status |
+| POST | `/api/challenges/{id}/start` | Start udfordring – lægger opgaverne i kalenderen |
+| DELETE | `/api/challenges/{id}` | Opgiv udfordring – fjerner ikke-gennemførte opgaver |
 | GET | `/api/shop/items` | Genstande i shoppen |
 | POST | `/api/shop/items/{id}/purchase` | Køb genstand |
 | GET | `/api/inventory` | Brugerens inventar |
@@ -119,7 +123,7 @@ Alle endpoints kan afprøves i Swagger UI eller med [LevelUp.Api.http](backend/L
 | POST | `/api/inventory/{id}/unequip` | Tag genstand af |
 | GET / PUT | `/api/profile` | Profil, level, XP og points / skift visningsnavn |
 | GET | `/api/profile/transactions` | Historik over points |
-| GET / PUT | `/api/profile/settings` | Påmindelser, tidszone og 2FA-metode |
+| GET / PUT | `/api/profile/settings` | Påmindelser (kanal og minutter før), tidszone og 2FA-metode |
 | POST | `/api/profile/phone` | Send SMS-kode til nyt telefonnummer |
 | POST | `/api/profile/phone/confirm` | Bekræft og gem telefonnummer |
 

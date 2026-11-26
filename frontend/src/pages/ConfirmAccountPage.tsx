@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { confirmAccount, resendConfirmation } from '../api/auth'
 import { getErrorMessage } from '../api/errors'
 import type { TwoFactorMethod } from '../api/types'
-import { Alert, Button, CodeField, TextField } from '../components/Form'
+import { Alert, Button, CodeField, RadioGroup, TextField } from '../components/Form'
 
 interface ConfirmState {
   email?: string
@@ -57,9 +57,9 @@ export default function ConfirmAccountPage() {
 
   return (
     <>
-      <h1 className="auth-title">Bekræft din konto</h1>
+      <h1 className="h4 mb-3">Bekræft din konto</h1>
 
-      <form className="form" onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit}>
         {error && <Alert>{error}</Alert>}
         {info && !error && <Alert kind="info">{info}</Alert>}
 
@@ -75,30 +75,31 @@ export default function ConfirmAccountPage() {
         )}
 
         {!state.method && (
-          <fieldset className="choice">
-            <legend className="field__label">Koden blev sendt via</legend>
-            <label className="choice__option">
-              <input type="radio" name="method" checked={method === 'Email'} onChange={() => setMethod('Email')} />
-              E-mail
-            </label>
-            <label className="choice__option">
-              <input type="radio" name="method" checked={method === 'Sms'} onChange={() => setMethod('Sms')} />
-              SMS
-            </label>
-          </fieldset>
+          <RadioGroup
+            legend="Koden blev sendt via"
+            name="method"
+            value={method}
+            options={[
+              { value: 'Email', label: 'E-mail' },
+              { value: 'Sms', label: 'SMS' },
+            ]}
+            onChange={setMethod}
+          />
         )}
 
         <CodeField value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))} required autoFocus />
 
-        <Button type="submit" loading={loading} disabled={code.length !== 6 || !email}>
-          Bekræft
-        </Button>
-        <Button type="button" variant="link" onClick={handleResend} loading={resending} disabled={!email}>
-          Send en ny kode
-        </Button>
+        <div className="d-grid gap-2">
+          <Button type="submit" loading={loading} disabled={code.length !== 6 || !email}>
+            Bekræft
+          </Button>
+          <Button type="button" variant="link" onClick={handleResend} loading={resending} disabled={!email}>
+            Send en ny kode
+          </Button>
+        </div>
       </form>
 
-      <p className="auth-switch">
+      <p className="mt-3 mb-0 small">
         <Link to="/login">Tilbage til login</Link>
       </p>
     </>

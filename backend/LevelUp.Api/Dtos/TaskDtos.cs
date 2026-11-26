@@ -27,13 +27,16 @@ public record TaskDto(
 /// <summary>Bruges både til at oprette og redigere en opgave.</summary>
 public class SaveTaskRequest : IValidatableObject
 {
-    [Required, MaxLength(150)]
+    [Display(Name = "Titel")]
+    [Required(ErrorMessage = ValidationMessages.Required), MaxLength(150, ErrorMessage = ValidationMessages.MaxLength)]
     public string Title { get; init; } = string.Empty;
 
-    [MaxLength(2000)]
+    [Display(Name = "Beskrivelsen")]
+    [MaxLength(2000, ErrorMessage = ValidationMessages.MaxLength)]
     public string? Description { get; init; }
 
-    [Required]
+    [Display(Name = "Starttidspunkt")]
+    [Required(ErrorMessage = ValidationMessages.Required)]
     public DateTime? ScheduledStart { get; init; }
 
     public DateTime? ScheduledEnd { get; init; }

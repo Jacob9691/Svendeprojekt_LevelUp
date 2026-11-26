@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using LevelUp.Api.Models;
+using static LevelUp.Api.Dtos.ValidationMessages;
 
 namespace LevelUp.Api.Dtos;
 
@@ -18,7 +19,8 @@ public record ProfileDto(
 
 public class UpdateProfileRequest
 {
-    [Required, MaxLength(100)]
+    [Display(Name = "Navn")]
+    [Required(ErrorMessage = Required), MaxLength(100, ErrorMessage = MaxLength)]
     public string DisplayName { get; init; } = string.Empty;
 }
 
@@ -44,7 +46,8 @@ public class UpdateSettingsRequest : IValidatableObject
     public bool EmailEnabled { get; init; }
     public bool SmsEnabled { get; init; }
 
-    [Required, MaxLength(50)]
+    [Display(Name = "Tidszone")]
+    [Required(ErrorMessage = Required), MaxLength(50, ErrorMessage = MaxLength)]
     public string TimeZone { get; init; } = string.Empty;
 
     /// <summary>Hvordan loginkoden sendes. SMS kræver et bekræftet telefonnummer.</summary>
@@ -63,15 +66,18 @@ public class UpdateSettingsRequest : IValidatableObject
 
 public class ChangePhoneRequest
 {
-    [Required, Phone, MaxLength(20)]
+    [Display(Name = "Telefonnummeret")]
+    [Required(ErrorMessage = Required), Phone(ErrorMessage = Phone), MaxLength(20, ErrorMessage = MaxLength)]
     public string PhoneNumber { get; init; } = string.Empty;
 }
 
 public class ConfirmPhoneRequest
 {
-    [Required, Phone, MaxLength(20)]
+    [Display(Name = "Telefonnummeret")]
+    [Required(ErrorMessage = Required), Phone(ErrorMessage = Phone), MaxLength(20, ErrorMessage = MaxLength)]
     public string PhoneNumber { get; init; } = string.Empty;
 
-    [Required, RegularExpression(@"^\d{6}$", ErrorMessage = "Koden består af 6 cifre.")]
+    [Display(Name = "Koden")]
+    [Required(ErrorMessage = Required), RegularExpression(@"^\d{6}$", ErrorMessage = ValidationMessages.Code)]
     public string Code { get; init; } = string.Empty;
 }

@@ -14,19 +14,31 @@ export default function DashboardPage() {
   }, [])
 
   return (
-    <div className="grid">
-      <section className="card">
-        <h2>Dagens opgaver</h2>
-        <p className="muted">Her vises dagens opgaver.</p>
-      </section>
-      <section className="card">
-        <h2>Fremskridt</h2>
-        <p className="muted">Her vises XP, level og achievements.</p>
-      </section>
-      <section className="card">
-        <h2>System</h2>
-        <p className="muted">API status: {status}</p>
-      </section>
+    <div className="row g-3">
+      <div className="col-md-4">
+        <div className="card h-100">
+          <div className="card-body">
+            <h2 className="h6 card-title">Dagens opgaver</h2>
+            <p className="card-text text-body-secondary">Her vises dagens opgaver.</p>
+          </div>
+        </div>
+      </div>
+      <div className="col-md-4">
+        <div className="card h-100">
+          <div className="card-body">
+            <h2 className="h6 card-title">Fremskridt</h2>
+            <p className="card-text text-body-secondary">Her vises XP, level og achievements.</p>
+          </div>
+        </div>
+      </div>
+      <div className="col-md-4">
+        <div className="card h-100">
+          <div className="card-body">
+            <h2 className="h6 card-title">System</h2>
+            <p className="card-text text-body-secondary">API status: {status}</p>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

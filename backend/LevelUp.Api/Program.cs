@@ -11,10 +11,29 @@ var builder = WebApplication.CreateBuilder(args);
 const string FrontendCorsPolicy = "Frontend";
 
 builder.Services
-    .AddControllers()
+    .AddControllers(options =>
+    {
+        // Danske beskeder når en værdi ikke kan læses, f.eks. tekst i et talfelt
+        var messages = options.ModelBindingMessageProvider;
+        messages.SetValueMustNotBeNullAccessor(_ => "Feltet skal udfyldes.");
+        messages.SetAttemptedValueIsInvalidAccessor((value, field) => $"Værdien '{value}' er ugyldig for {field}.");
+        messages.SetValueIsInvalidAccessor(value => $"Værdien '{value}' er ugyldig.");
+        messages.SetValueMustBeANumberAccessor(field => $"{field} skal være et tal.");
+        messages.SetMissingKeyOrValueAccessor(() => "Der mangler en værdi.");
+        messages.SetMissingRequestBodyRequiredValueAccessor(() => "Der mangler data i requesten.");
+
+        // Undgå den engelske "The request field is required." når JSON ikke kan læses
+        options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true;
+    })
     .AddJsonOptions(options =>
+    {
         // Enums sendes som tekst ("Completed") i stedet for tal
-        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        // Send ikke tekniske JSON-fejlbeskeder til klienten
+        options.AllowInputFormatterExceptionMessages = false;
+    })
+    .ConfigureApiBehaviorOptions(options =>
+        options.InvalidModelStateResponseFactory = ValidationResponse.Create);
 
 builder.Services.AddOpenApi(options =>
 {

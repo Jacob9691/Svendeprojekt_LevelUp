@@ -102,24 +102,26 @@ export default function LoginPage() {
 
     return (
       <>
-        <h1 className="auth-title">Indtast din kode</h1>
+        <h1 className="h4 mb-3">Indtast din kode</h1>
 
-        <form className="form" onSubmit={handleCode}>
+        <form onSubmit={handleCode}>
           {error && <Alert>{error}</Alert>}
           <Alert kind="info">{info ?? `Vi har sendt en kode via ${channel} til ${challenge.sentTo}.`}</Alert>
 
           <CodeField value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))} required autoFocus />
 
-          <Button type="submit" loading={loading} disabled={code.length !== 6}>
-            Log ind
-          </Button>
-          <Button type="button" variant="link" onClick={handleResend} disabled={loading}>
-            Send en ny kode
-          </Button>
+          <div className="d-grid gap-2">
+            <Button type="submit" loading={loading} disabled={code.length !== 6}>
+              Log ind
+            </Button>
+            <Button type="button" variant="link" onClick={handleResend} disabled={loading}>
+              Send en ny kode
+            </Button>
+          </div>
         </form>
 
-        <p className="auth-switch">
-          <button type="button" className="link-button" onClick={startOver}>
+        <p className="mt-3 mb-0 small">
+          <button type="button" className="btn btn-link btn-sm p-0" onClick={startOver}>
             Log ind med en anden konto
           </button>
         </p>
@@ -129,9 +131,9 @@ export default function LoginPage() {
 
   return (
     <>
-      <h1 className="auth-title">Log ind</h1>
+      <h1 className="h4 mb-3">Log ind</h1>
 
-      <form className="form" onSubmit={handlePassword}>
+      <form onSubmit={handlePassword}>
         {info && <Alert kind="success">{info}</Alert>}
         {error && (
           <Alert>
@@ -139,7 +141,7 @@ export default function LoginPage() {
             {needsConfirmation && (
               <>
                 {' '}
-                <Link to="/bekraeft" state={{ email }}>
+                <Link to="/bekraeft" state={{ email }} className="alert-link">
                   Bekræft konto
                 </Link>
               </>
@@ -166,12 +168,12 @@ export default function LoginPage() {
           autoFocus={!!email}
         />
 
-        <Button type="submit" loading={loading}>
+        <Button type="submit" loading={loading} className="w-100">
           Fortsæt
         </Button>
       </form>
 
-      <p className="auth-switch">
+      <p className="mt-3 mb-0 small">
         Har du ikke en konto? <Link to="/opret">Opret konto</Link>
       </p>
     </>

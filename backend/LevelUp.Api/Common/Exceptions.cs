@@ -30,7 +30,7 @@ public class AccessDeniedException(string message, string code)
 
 /// <summary>Valideringsfejl der først opdages i en service, f.eks. fra Identity. 400.</summary>
 public class RequestValidationException(IDictionary<string, string[]> errors)
-    : ApiException(StatusCodes.Status400BadRequest, "Ugyldige data", "Et eller flere felter er ugyldige.")
+    : ApiException(StatusCodes.Status400BadRequest, ValidationResponse.Title, ValidationResponse.Title)
 {
     public IDictionary<string, string[]> Errors { get; } = errors;
 

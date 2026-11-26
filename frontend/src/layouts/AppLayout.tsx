@@ -9,10 +9,10 @@ export default function AppLayout() {
   const title = navItems.find((item) => item.to === pathname)?.label
 
   return (
-    <div className="app-layout">
+    <div className="d-flex flex-column min-vh-100">
       <Header />
-      <main className="app-layout__content container">
-        {title && <h1 className="page-title">{title}</h1>}
+      <main className="container py-4">
+        {title && <h1 className="h3 mb-4">{title}</h1>}
         <Outlet />
       </main>
       <Footer />

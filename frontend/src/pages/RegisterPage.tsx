@@ -3,7 +3,12 @@ import { Link, useNavigate } from 'react-router-dom'
 import { register } from '../api/auth'
 import { getErrorMessage, getFieldErrors } from '../api/errors'
 import type { TwoFactorMethod } from '../api/types'
-import { Alert, Button, TextField } from '../components/Form'
+import { Alert, Button, RadioGroup, TextField } from '../components/Form'
+
+const methodOptions: { value: TwoFactorMethod; label: string }[] = [
+  { value: 'Email', label: 'E-mail' },
+  { value: 'Sms', label: 'SMS' },
+]
 
 export default function RegisterPage() {
   const navigate = useNavigate()
@@ -51,9 +56,9 @@ export default function RegisterPage() {
 
   return (
     <>
-      <h1 className="auth-title">Opret konto</h1>
+      <h1 className="h4 mb-3">Opret konto</h1>
 
-      <form className="form" onSubmit={handleSubmit} noValidate>
+      <form onSubmit={handleSubmit} noValidate>
         {error && <Alert>{error}</Alert>}
 
         <TextField
@@ -84,17 +89,13 @@ export default function RegisterPage() {
           required
         />
 
-        <fieldset className="choice">
-          <legend className="field__label">Send bekræftelseskode via</legend>
-          <label className="choice__option">
-            <input type="radio" name="method" checked={method === 'Email'} onChange={() => setMethod('Email')} />
-            E-mail
-          </label>
-          <label className="choice__option">
-            <input type="radio" name="method" checked={method === 'Sms'} onChange={() => setMethod('Sms')} />
-            SMS
-          </label>
-        </fieldset>
+        <RadioGroup
+          legend="Send bekræftelseskode via"
+          name="method"
+          value={method}
+          options={methodOptions}
+          onChange={setMethod}
+        />
 
         {method === 'Sms' && (
           <TextField
@@ -109,12 +110,12 @@ export default function RegisterPage() {
           />
         )}
 
-        <Button type="submit" loading={loading}>
+        <Button type="submit" loading={loading} className="w-100">
           Opret konto
         </Button>
       </form>
 
-      <p className="auth-switch">
+      <p className="mt-3 mb-0 small">
         Har du allerede en konto? <Link to="/login">Log ind</Link>
       </p>
     </>

@@ -6,32 +6,31 @@ interface TextFieldProps extends InputHTMLAttributes<HTMLInputElement> {
   hint?: string
 }
 
-/** Inputfelt med label, hjælpetekst og fejlbesked. */
-export function TextField({ label, error, hint, ...inputProps }: TextFieldProps) {
+/** Bootstrap-inputfelt med label, hjælpetekst og fejlbesked. */
+export function TextField({ label, error, hint, className, ...inputProps }: TextFieldProps) {
   const id = useId()
   const messageId = `${id}-message`
 
   return (
-    <div className="field">
-      <label htmlFor={id} className="field__label">
+    <div className="mb-3">
+      <label htmlFor={id} className="form-label">
         {label}
       </label>
       <input
         id={id}
-        className={`field__input${error ? ' has-error' : ''}`}
-        aria-invalid={error ? true : undefined}
+        className={`form-control${error ? ' is-invalid' : ''}${className ? ` ${className}` : ''}`}
         aria-describedby={error || hint ? messageId : undefined}
         {...inputProps}
       />
       {error ? (
-        <p id={messageId} className="field__error">
+        <div id={messageId} className="invalid-feedback">
           {error}
-        </p>
+        </div>
       ) : (
         hint && (
-          <p id={messageId} className="field__hint">
+          <div id={messageId} className="form-text">
             {hint}
-          </p>
+          </div>
         )
       )}
     </div>
@@ -48,34 +47,67 @@ export function CodeField(props: Omit<TextFieldProps, 'label'> & { label?: strin
       pattern="\d{6}"
       maxLength={6}
       placeholder="123456"
-      className="field__input field__input--code"
+      className="form-control-lg text-center font-monospace"
       {...props}
     />
   )
 }
 
+interface RadioGroupProps<T extends string> {
+  legend: string
+  name: string
+  value: T
+  options: { value: T; label: string }[]
+  onChange: (value: T) => void
+}
+
+export function RadioGroup<T extends string>({ legend, name, value, options, onChange }: RadioGroupProps<T>) {
+  return (
+    <fieldset className="mb-3">
+      <legend className="form-label fs-6">{legend}</legend>
+      {options.map((option) => (
+        <div key={option.value} className="form-check form-check-inline">
+          <input
+            id={`${name}-${option.value}`}
+            className="form-check-input"
+            type="radio"
+            name={name}
+            checked={value === option.value}
+            onChange={() => onChange(option.value)}
+          />
+          <label htmlFor={`${name}-${option.value}`} className="form-check-label">
+            {option.label}
+          </label>
+        </div>
+      ))}
+    </fieldset>
+  )
+}
+
+const alertClass = { error: 'alert-danger', info: 'alert-info', success: 'alert-success' }
+
 export function Alert({ kind = 'error', children }: { kind?: 'error' | 'info' | 'success'; children: ReactNode }) {
   return (
-    <div className={`alert alert--${kind}`} role={kind === 'error' ? 'alert' : 'status'}>
+    <div className={`alert ${alertClass[kind]} py-2`} role={kind === 'error' ? 'alert' : 'status'}>
       {children}
     </div>
   )
 }
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'link'
+  variant?: 'primary' | 'outline-secondary' | 'link'
   loading?: boolean
 }
 
 export function Button({ variant = 'primary', loading, disabled, children, className, ...props }: ButtonProps) {
   return (
     <button
-      className={`button button--${variant}${className ? ` ${className}` : ''}`}
+      className={`btn btn-${variant}${className ? ` ${className}` : ''}`}
       disabled={disabled || loading}
-      aria-busy={loading || undefined}
       {...props}
     >
-      {loading ? 'Vent…' : children}
+      {loading && <span className="spinner-border spinner-border-sm me-2" aria-hidden="true" />}
+      {children}
     </button>
   )
 }

@@ -1,21 +1,26 @@
 using System.ComponentModel.DataAnnotations;
 using LevelUp.Api.Models;
+using static LevelUp.Api.Dtos.ValidationMessages;
 
 namespace LevelUp.Api.Dtos;
 
 public class RegisterRequest : IValidatableObject
 {
-    [Required, EmailAddress, MaxLength(255)]
+    [Display(Name = "E-mail")]
+    [Required(ErrorMessage = Required), EmailAddress(ErrorMessage = ValidationMessages.Email), MaxLength(255, ErrorMessage = MaxLength)]
     public string Email { get; init; } = string.Empty;
 
-    [Required, MinLength(8), MaxLength(100)]
+    [Display(Name = "Adgangskoden")]
+    [Required(ErrorMessage = Required), MinLength(8, ErrorMessage = MinLength), MaxLength(100, ErrorMessage = MaxLength)]
     public string Password { get; init; } = string.Empty;
 
-    [Required, MaxLength(100)]
+    [Display(Name = "Navn")]
+    [Required(ErrorMessage = Required), MaxLength(100, ErrorMessage = MaxLength)]
     public string DisplayName { get; init; } = string.Empty;
 
     /// <summary>Krævet hvis kontoen skal bekræftes via SMS. Format: +4512345678.</summary>
-    [Phone, MaxLength(20)]
+    [Display(Name = "Telefonnummeret")]
+    [Phone(ErrorMessage = Phone), MaxLength(20, ErrorMessage = MaxLength)]
     public string? PhoneNumber { get; init; }
 
     /// <summary>Hvor bekræftelseskoden skal sendes hen. Bliver også brugerens 2FA-metode.</summary>
@@ -36,10 +41,12 @@ public record RegisterResponse(string Message, TwoFactorMethod ConfirmationMetho
 
 public class ConfirmAccountRequest
 {
-    [Required, EmailAddress]
+    [Display(Name = "E-mail")]
+    [Required(ErrorMessage = Required), EmailAddress(ErrorMessage = ValidationMessages.Email)]
     public string Email { get; init; } = string.Empty;
 
-    [Required, RegularExpression(@"^\d{6}$", ErrorMessage = "Koden består af 6 cifre.")]
+    [Display(Name = "Koden")]
+    [Required(ErrorMessage = Required), RegularExpression(@"^\d{6}$", ErrorMessage = ValidationMessages.Code)]
     public string Code { get; init; } = string.Empty;
 
     public TwoFactorMethod Method { get; init; } = TwoFactorMethod.Email;
@@ -47,7 +54,8 @@ public class ConfirmAccountRequest
 
 public class ResendConfirmationRequest
 {
-    [Required, EmailAddress]
+    [Display(Name = "E-mail")]
+    [Required(ErrorMessage = Required), EmailAddress(ErrorMessage = ValidationMessages.Email)]
     public string Email { get; init; } = string.Empty;
 
     public TwoFactorMethod Method { get; init; } = TwoFactorMethod.Email;
@@ -55,10 +63,12 @@ public class ResendConfirmationRequest
 
 public class LoginRequest
 {
-    [Required, EmailAddress]
+    [Display(Name = "E-mail")]
+    [Required(ErrorMessage = Required), EmailAddress(ErrorMessage = ValidationMessages.Email)]
     public string Email { get; init; } = string.Empty;
 
-    [Required]
+    [Display(Name = "Adgangskoden")]
+    [Required(ErrorMessage = Required)]
     public string Password { get; init; } = string.Empty;
 }
 
@@ -67,16 +77,17 @@ public record LoginResponse(string TwoFactorToken, TwoFactorMethod Method, strin
 
 public class VerifyTwoFactorRequest
 {
-    [Required]
+    [Required(ErrorMessage = TwoFactorTokenMissing)]
     public string TwoFactorToken { get; init; } = string.Empty;
 
-    [Required, RegularExpression(@"^\d{6}$", ErrorMessage = "Koden består af 6 cifre.")]
+    [Display(Name = "Koden")]
+    [Required(ErrorMessage = Required), RegularExpression(@"^\d{6}$", ErrorMessage = ValidationMessages.Code)]
     public string Code { get; init; } = string.Empty;
 }
 
 public class ResendTwoFactorRequest
 {
-    [Required]
+    [Required(ErrorMessage = TwoFactorTokenMissing)]
     public string TwoFactorToken { get; init; } = string.Empty;
 }
 

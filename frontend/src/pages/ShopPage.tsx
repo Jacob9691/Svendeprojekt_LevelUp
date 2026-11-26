@@ -5,6 +5,7 @@ import { getShopItems, purchaseItem } from '../api/shop'
 import type { ShopItem } from '../api/types'
 import { useAuth } from '../auth/useAuth'
 import { Alert, Button } from '../components/Form'
+import GameIcon from '../components/GameIcon'
 import { categoryInfo } from '../utils/categories'
 import { achievementsMessage } from '../utils/rewards'
 
@@ -65,7 +66,7 @@ export default function ShopPage() {
       {error && <Alert>{error}</Alert>}
       {success && (
         <div className="alert alert-success alert-dismissible py-2" role="status">
-          {success} Udstyr den på <Link to="/karakter" className="alert-link">Karakter</Link>-siden.
+          {success} Udstyr den på <Link to="/character" className="alert-link">Karakter</Link>-siden.
           <button type="button" className="btn-close py-2" aria-label="Luk" onClick={() => setSuccess(null)} />
         </div>
       )}
@@ -85,9 +86,7 @@ export default function ShopPage() {
                   <div key={item.id} className="col-12 col-sm-6 col-lg-4">
                     <div className={`card h-100${item.owned ? ' border-success' : ''}`}>
                       <div className="card-body d-flex gap-3">
-                        <div className="fs-1 lh-1" aria-hidden="true">
-                          {icon}
-                        </div>
+                        <GameIcon name={icon} className="fs-1 flex-shrink-0" />
                         <div>
                           <h3 className="h6 card-title mb-1">{item.name}</h3>
                           <p className="card-text small text-body-secondary mb-2">{item.description}</p>

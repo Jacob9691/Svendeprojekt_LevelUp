@@ -1,0 +1,7 @@
+/* Kalenderen bruger Bootstraps farver, så den passer til både lyst og mørkt tema */
+.levelup-calendar {
+  --fc-classic-background: var(--bs-body-bg);
+  --fc-classic-foreground: var(--bs-body-color);
+  --fc-classic-muted-foreground: var(--bs-secondary-color);
+  --fc-classic-border: var(--bs-border-color);
+}

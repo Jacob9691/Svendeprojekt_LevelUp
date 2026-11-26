@@ -11,7 +11,7 @@ export async function getChallenges(): Promise<Challenge[]> {
   return data
 }
 
-/** Starter udfordringen. Tidspunkterne er for den første opgave – resten følger gentagelsen. */
+/** Starter udfordringen. Tidspunkterne er for den første opgave, resten følger gentagelsen. */
 export async function startChallenge(id: number, scheduledStart: string, scheduledEnd: string | null): Promise<Challenge> {
   const { data } = await api.post<Challenge>(`/challenges/${id}/start`, { scheduledStart, scheduledEnd })
   return data

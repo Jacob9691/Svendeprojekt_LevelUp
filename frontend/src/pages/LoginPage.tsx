@@ -64,7 +64,7 @@ export default function LoginPage() {
       setCode('')
       setError(getErrorMessage(err))
 
-      // 2FA-tokenet er udløbet (10 min) – start forfra med adgangskoden
+      // 2FA-tokenet er udløbet (10 min), start forfra med adgangskoden
       if (getErrorCode(err) === 'twoFactorTokenExpired') {
         setChallenge(null)
       }
@@ -141,7 +141,7 @@ export default function LoginPage() {
             {needsConfirmation && (
               <>
                 {' '}
-                <Link to="/bekraeft" state={{ email }} className="alert-link">
+                <Link to="/confirm" state={{ email }} className="alert-link">
                   Bekræft konto
                 </Link>
               </>
@@ -174,7 +174,7 @@ export default function LoginPage() {
       </form>
 
       <p className="mt-3 mb-0 small">
-        Har du ikke en konto? <Link to="/opret">Opret konto</Link>
+        Har du ikke en konto? <Link to="/register">Opret konto</Link>
       </p>
     </>
   )

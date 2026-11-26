@@ -147,7 +147,7 @@ export default function ChallengeCard({ challenge, onChanged }: ChallengeCardPro
 
         {status === 'Active' && !confirmAbandon && (
           <div className="d-flex align-items-center gap-2">
-            <Link to="/ugeplan" className="btn btn-outline-primary btn-sm">
+            <Link to="/week-plan" className="btn btn-outline-primary btn-sm">
               Se i ugeplanen
             </Link>
             <Button variant="link" className="btn-sm text-danger ms-auto" onClick={() => setConfirmAbandon(true)}>
@@ -170,7 +170,7 @@ export default function ChallengeCard({ challenge, onChanged }: ChallengeCardPro
 
         {status === 'Completed' && challenge.completedAt && (
           <span className="small text-success fw-semibold">
-            ✓ Gennemført {new Date(challenge.completedAt).toLocaleDateString('da-DK')}
+            Gennemført {new Date(challenge.completedAt).toLocaleDateString('da-DK')}
           </span>
         )}
       </div>

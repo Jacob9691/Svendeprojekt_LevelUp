@@ -8,7 +8,7 @@ import { Alert, Button, SelectField, TextAreaField, TextField } from './Form'
 const repeatOptions: { value: RecurrenceFrequency | ''; label: string }[] = [
   { value: '', label: 'Gentages ikke' },
   { value: 'Daily', label: 'Hver dag' },
-  { value: 'Weekdays', label: 'Hverdage (man–fre)' },
+  { value: 'Weekdays', label: 'Hverdage (man-fre)' },
   { value: 'Weekly', label: 'Hver uge' },
   { value: 'Biweekly', label: 'Hver 2. uge' },
   { value: 'Monthly', label: 'Hver måned' },
@@ -196,7 +196,7 @@ export default function TaskModal({ mode, onClose, onChanged, onCompleted }: Tas
                 </div>
               </div>
 
-              {/* Gentagelse kan kun vælges ved oprettelse – hver gentagelse bliver sin egen opgave */}
+              {/* Gentagelse kan kun vælges ved oprettelse, hver gentagelse bliver sin egen opgave */}
               {!task && (
                 <div className="row g-2">
                   <div className="col-12 col-sm-6">

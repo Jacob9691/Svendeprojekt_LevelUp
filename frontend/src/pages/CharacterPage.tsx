@@ -5,6 +5,7 @@ import { equipItem, getInventory, unequipItem } from '../api/inventory'
 import type { InventoryItem } from '../api/types'
 import { useAuth } from '../auth/useAuth'
 import { Alert, Button } from '../components/Form'
+import GameIcon from '../components/GameIcon'
 import { categories, categoryInfo } from '../utils/categories'
 
 export default function CharacterPage() {
@@ -45,9 +46,7 @@ export default function CharacterPage() {
       <div className="col-lg-4">
         <div className="card h-100">
           <div className="card-body text-center">
-            <div className="display-1" aria-hidden="true">
-              🧙
-            </div>
+            <GameIcon name="character" className="display-1 mb-2" />
             <h2 className="h5 mb-1">{profile?.displayName}</h2>
             {profile && <span className="badge text-bg-primary">Level {profile.level}</span>}
           </div>
@@ -61,7 +60,7 @@ export default function CharacterPage() {
                   <span className="text-body-secondary">{info.slot}</span>
                   {item ? (
                     <span>
-                      <span aria-hidden="true">{info.icon}</span> {item.name}
+                      <GameIcon name={info.icon} /> {item.name}
                     </span>
                   ) : (
                     <span className="text-body-secondary small">Intet</span>
@@ -97,9 +96,7 @@ export default function CharacterPage() {
 
                 return (
                   <li key={item.id} className="list-group-item d-flex align-items-center gap-3">
-                    <span className="fs-3" aria-hidden="true">
-                      {info.icon}
-                    </span>
+                    <GameIcon name={info.icon} className="fs-3 flex-shrink-0" />
                     <div className="me-auto">
                       <div className="fw-semibold">
                         {item.name}

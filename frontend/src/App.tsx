@@ -21,15 +21,15 @@ export default function App() {
       <Route element={<RequireAuth />}>
         <Route element={<AppLayout />}>
           <Route index element={<DashboardPage />} />
-          <Route path="ugeplan" element={<WeekPlanPage />} />
-          <Route path="maal" element={<GoalsPage />} />
+          <Route path="week-plan" element={<WeekPlanPage />} />
+          <Route path="goals" element={<GoalsPage />} />
           <Route path="shop" element={<ShopPage />} />
-          <Route path="karakter" element={<CharacterPage />} />
-          <Route path="profil" element={<ProfilePage />} />
+          <Route path="character" element={<CharacterPage />} />
+          <Route path="profile" element={<ProfilePage />} />
         </Route>
 
         <Route element={<AuthLayout />}>
-          <Route path="velkommen" element={<WelcomePage />} />
+          <Route path="welcome" element={<WelcomePage />} />
         </Route>
       </Route>
 
@@ -37,8 +37,8 @@ export default function App() {
       <Route element={<GuestOnly />}>
         <Route element={<AuthLayout />}>
           <Route path="login" element={<LoginPage />} />
-          <Route path="opret" element={<RegisterPage />} />
-          <Route path="bekraeft" element={<ConfirmAccountPage />} />
+          <Route path="register" element={<RegisterPage />} />
+          <Route path="confirm" element={<ConfirmAccountPage />} />
         </Route>
       </Route>
 

@@ -36,7 +36,7 @@ export default function RegisterPage() {
         confirmationMethod: method,
       })
 
-      navigate('/bekraeft', {
+      navigate('/confirm', {
         state: { email, method: response.confirmationMethod, sentTo: response.sentTo },
       })
     } catch (err) {

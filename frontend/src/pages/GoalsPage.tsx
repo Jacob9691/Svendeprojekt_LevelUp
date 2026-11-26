@@ -4,6 +4,7 @@ import { getAchievements, getChallenges } from '../api/goals'
 import type { Achievement, Challenge } from '../api/types'
 import ChallengeCard from '../components/ChallengeCard'
 import { Alert } from '../components/Form'
+import GameIcon from '../components/GameIcon'
 import { achievementIcons } from '../utils/rewards'
 
 /** Achievements (mål der låses op automatisk) og udfordringer (forløb man sætter i kalenderen). */
@@ -63,15 +64,16 @@ export default function GoalsPage() {
               <div key={achievement.id} className="col-6 col-md-4 col-xl-3">
                 <div className={`card h-100 text-center${unlocked ? ' border-success' : ''}`}>
                   <div className="card-body">
-                    <div className={`fs-1${unlocked ? '' : ' opacity-25'}`} aria-hidden="true">
-                      {achievementIcons[achievement.type]}
-                    </div>
+                    <GameIcon
+                      name={achievementIcons[achievement.type]}
+                      className={`fs-1 mb-1${unlocked ? ' text-success' : ' opacity-25'}`}
+                    />
                     <h3 className="h6 mb-1">{achievement.name}</h3>
                     <p className="small text-body-secondary mb-2">{achievement.description}</p>
 
                     {unlocked ? (
                       <span className="small text-success fw-semibold">
-                        🏆 Låst op {new Date(achievement.unlockedAt!).toLocaleDateString('da-DK')}
+                        <GameIcon name="trophy" /> Låst op {new Date(achievement.unlockedAt!).toLocaleDateString('da-DK')}
                       </span>
                     ) : (
                       <>

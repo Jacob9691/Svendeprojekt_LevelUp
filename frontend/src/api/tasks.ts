@@ -1,13 +1,13 @@
 import { api } from './client'
 import type { CompleteTaskResponse, CreateTaskRequest, SaveTaskRequest, TaskItem } from './types'
 
-/** Opgaver der starter i perioden [from, to). Datoerne er lokale tidspunkter, se utils/dates.ts. */
+/** Opgaver der starter i perioden (from, to). Datoerne er lokale tidspunkter, se utils/dates.ts. */
 export async function getTasks(from: string, to: string): Promise<TaskItem[]> {
   const { data } = await api.get<TaskItem[]>('/tasks', { params: { from, to } })
   return data
 }
 
-/** Opretter opgaven – eller en hel serie, hvis repeat er sat. Returnerer den første. */
+/** Opretter opgaven, eller en hel serie, hvis repeat er sat. Returnerer den første. */
 export async function createTask(request: CreateTaskRequest): Promise<TaskItem> {
   const { data } = await api.post<TaskItem>('/tasks', request)
   return data

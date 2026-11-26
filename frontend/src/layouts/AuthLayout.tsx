@@ -1,6 +1,6 @@
 import { Outlet } from 'react-router-dom'
 
-/** Layout for login, registrering og onboarding – uden menu. */
+/** Layout for login, registrering og onboarding, uden menu. */
 export default function AuthLayout() {
   return (
     <div className="bg-body-tertiary min-vh-100 d-flex align-items-center py-4">

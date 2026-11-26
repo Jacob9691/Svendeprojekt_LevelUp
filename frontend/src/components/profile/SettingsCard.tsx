@@ -19,7 +19,7 @@ interface SettingsCardProps {
 
 /** Påmindelser (kanal og tidspunkt) og hvordan loginkoden (2FA) sendes. */
 export default function SettingsCard({ settings, onSaved }: SettingsCardProps) {
-  // SMS kan kun bruges med et bekræftet nummer. Er nummeret ikke bekræftet, vises og gemmes SMS som slået fra –
+  // SMS kan kun bruges med et bekræftet nummer. Er nummeret ikke bekræftet, vises og gemmes SMS som slået fra,
   // ellers kunne brugeren sidde fast med en tændt kontakt, de ikke kan slukke.
   const smsAvailable = settings.phoneNumberConfirmed
 

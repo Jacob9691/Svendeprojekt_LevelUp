@@ -5,9 +5,9 @@ export interface NavItem {
 
 export const navItems: NavItem[] = [
   { to: '/', label: 'Dashboard' },
-  { to: '/ugeplan', label: 'Ugeplan' },
-  { to: '/maal', label: 'Mål' },
+  { to: '/week-plan', label: 'Ugeplan' },
+  { to: '/goals', label: 'Mål' },
   { to: '/shop', label: 'Shop' },
-  { to: '/karakter', label: 'Karakter' },
-  { to: '/profil', label: 'Profil' },
+  { to: '/character', label: 'Karakter' },
+  { to: '/profile', label: 'Profil' },
 ]

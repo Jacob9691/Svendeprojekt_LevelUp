@@ -22,7 +22,7 @@ export function setUnauthorizedHandler(handler: (() => void) | null): void {
   onUnauthorized = handler
 }
 
-// Et 401-svar på en request med token betyder at tokenet er udløbet – log ud.
+// Et 401-svar på en request med token betyder at tokenet er udløbet - log ud.
 // (401 ved login uden token er bare forkert adgangskode og håndteres af siden.)
 api.interceptors.response.use(
   (response) => response,

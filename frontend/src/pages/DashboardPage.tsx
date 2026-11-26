@@ -95,7 +95,7 @@ export default function DashboardPage() {
           ) : tasks.length === 0 ? (
             <div className="card-body">
               <p className="text-body-secondary mb-2">Du har ingen opgaver i dag.</p>
-              <Link to="/ugeplan" className="btn btn-primary btn-sm">
+              <Link to="/week-plan" className="btn btn-primary btn-sm">
                 Planlæg i ugeplanen
               </Link>
             </div>

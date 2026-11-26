@@ -1,4 +1,5 @@
 import type { Achievement, AchievementType, CompleteTaskResponse, RecurrenceFrequency } from '../api/types'
+import type { IconName } from './icons'
 
 /** Beskeden der vises, når en opgave er gennemført – inkl. udfordring, level og nye achievements. */
 export function rewardMessage(result: CompleteTaskResponse): string {
@@ -32,11 +33,11 @@ export function achievementsMessage(achievements: Achievement[]): string {
   return `🏆 ${label}: ${achievements.map((a) => a.name).join(', ')}.`
 }
 
-export const achievementIcons: Record<AchievementType, string> = {
-  Level: '⭐',
-  TasksCompleted: '✅',
-  ItemsBought: '🛍️',
-  ChallengesCompleted: '🏁',
+export const achievementIcons: Record<AchievementType, IconName> = {
+  Level: 'level',
+  TasksCompleted: 'tasksCompleted',
+  ItemsBought: 'itemsBought',
+  ChallengesCompleted: 'challengesCompleted',
 }
 
 export const repeatLabels: Record<RecurrenceFrequency, string> = {

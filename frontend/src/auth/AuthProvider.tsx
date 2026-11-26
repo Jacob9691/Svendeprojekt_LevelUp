@@ -63,7 +63,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     getProfile()
       .then(setProfile)
       .catch(() => {
-        // 401 håndteres af interceptoren – andre fejl betyder bare at profilen ikke vises endnu
+        // 401 håndteres af interceptoren, andre fejl betyder bare at profilen ikke vises endnu
       })
   }, [session])
 

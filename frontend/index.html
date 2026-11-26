@@ -5,6 +5,18 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>LevelUp</title>
+    <script>
+      // Sæt lys/mørk tema før siden tegnes, så den ikke blinker. Samme logik som src/utils/theme.ts
+      (function () {
+        var theme = null
+        try { theme = localStorage.getItem('levelup.theme') } catch (e) {}
+        if (theme !== 'light' && theme !== 'dark') {
+          theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+        }
+        document.documentElement.dataset.bsTheme = theme
+        document.documentElement.dataset.colorScheme = theme
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>

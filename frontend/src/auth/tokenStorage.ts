@@ -30,7 +30,7 @@ export function saveSession(session: StoredSession): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(session))
   } catch {
-    // Fx privat browsing – sessionen holdes så kun i hukommelsen
+    // Fx privat browsing, sessionen holdes så kun i hukommelsen
   }
 }
 

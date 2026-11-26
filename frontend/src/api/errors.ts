@@ -5,12 +5,12 @@ function getProblem(error: unknown): ProblemDetails | undefined {
   return isAxiosError<ProblemDetails>(error) ? error.response?.data : undefined
 }
 
-/** Den faste fejlkode fra API'et, f.eks. "accountNotConfirmed" eller "lockedOut". */
+/** Den faste fejlkode fra API'et, fx. "accountNotConfirmed" eller "lockedOut". */
 export function getErrorCode(error: unknown): string | undefined {
   return getProblem(error)?.code
 }
 
-/** Valideringsfejl pr. felt. Nøglerne gøres små (Email → email), så de matcher formularens felter. */
+/** Valideringsfejl pr. felt. Nøglerne gøres små (Email -> email), så de matcher formularens felter. */
 export function getFieldErrors(error: unknown): Record<string, string> {
   const errors = getProblem(error)?.errors ?? {}
   const result: Record<string, string> = {}

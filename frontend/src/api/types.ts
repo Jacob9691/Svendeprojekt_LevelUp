@@ -33,14 +33,14 @@ export interface LoginRequest {
   password: string
 }
 
-/** Svar på login trin 1 – koden er sendt. */
+/** Svar på login trin 1 - koden er sendt. */
 export interface LoginResponse {
   twoFactorToken: string
   method: TwoFactorMethod
   sentTo: string
 }
 
-/** Svar på login trin 2 – brugeren er logget ind. */
+/** Svar på login trin 2 - brugeren er logget ind. */
 export interface AuthResponse {
   accessToken: string
   expiresAt: string
@@ -68,9 +68,9 @@ export interface Profile {
 export interface Settings {
   /** Påmindelser på e-mail. */
   emailEnabled: boolean
-  /** Påmindelser på SMS – kræver bekræftet telefonnummer. */
+  /** Påmindelser på SMS - kræver bekræftet telefonnummer. */
   smsEnabled: boolean
-  /** Minutter før en opgave påmindelsen sendes (5–1440). */
+  /** Minutter før en opgave påmindelsen sendes (5-1440). */
   reminderMinutesBefore: number
   timeZone: string
   /** Hvordan loginkoden (2FA) sendes. */
@@ -87,7 +87,7 @@ export type UpdateSettingsRequest = Pick<
 
 export type TaskStatus = 'Pending' | 'Completed'
 
-/** Tidspunkter er lokale uden tidszone, f.eks. "2026-11-25T09:00:00". */
+/** Tidspunkter er lokale uden tidszone, fx. "2026-11-25T09:00:00". */
 export interface TaskItem {
   id: number
   title: string
@@ -111,9 +111,9 @@ export interface SaveTaskRequest {
 export type RecurrenceFrequency = 'Daily' | 'Weekdays' | 'Weekly' | 'Biweekly' | 'Monthly'
 
 export interface CreateTaskRequest extends SaveTaskRequest {
-  /** Udelades for en opgave der kun sker én gang. */
+  /** Udelades for en opgave der kun sker en gang. */
   repeat?: RecurrenceFrequency
-  /** Sidste dato i serien, f.eks. "2026-12-31". Krævet sammen med repeat. */
+  /** Sidste dato i serien, fx. "2026-12-31". Krævet sammen med repeat. */
   repeatUntil?: string
 }
 

@@ -10,7 +10,7 @@ interface PhoneCardProps {
 }
 
 /**
- * Tilføj eller skift telefonnummer i to trin: send kode → bekræft kode.
+ * Tilføj eller skift telefonnummer i to trin: send kode -> bekræft kode.
  * Nummeret gemmes først, når koden er bekræftet.
  */
 export default function PhoneCard({ settings, onConfirmed }: PhoneCardProps) {

@@ -6,6 +6,7 @@ import { useAuth } from '../auth/useAuth'
 import { Alert, Button } from '../components/Form'
 import PhoneCard from '../components/profile/PhoneCard'
 import SettingsCard from '../components/profile/SettingsCard'
+import ThemeCard from '../components/profile/ThemeCard'
 
 export default function ProfilePage() {
   const { profile, signOut } = useAuth()
@@ -78,6 +79,7 @@ export default function ProfilePage() {
             <SettingsCard settings={settings} onSaved={setSettings} />
           </div>
           <div className="col-lg-5 d-flex flex-column gap-3">
+            <ThemeCard />
             <PhoneCard settings={settings} onConfirmed={setSettings} />
             <div className="card">
               <div className="card-body">

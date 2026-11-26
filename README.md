@@ -73,7 +73,12 @@ Login i frontenden (`frontend/src/auth`):
   og logger automatisk ud, når tokenet udløber.
 - axios sender tokenet med på alle kald (`api/client.ts`). Svarer API'et `401` på et kald med token, logges brugeren ud.
 - `RequireAuth` sender brugere uden login til `/login` og tilbage til den side, de prøvede at åbne, efter login.
-- Sider: `/opret` → `/bekraeft` (kode) → `/login` (adgangskode, derefter engangskode).
+- Sider: `/register` → `/confirm` (kode) → `/login` (adgangskode, derefter engangskode).
+  Adresserne er på engelsk (`/week-plan`, `/goals`, `/character`, `/profile`), titlerne på siderne er på dansk.
+
+Ikoner kommer fra [game-icons.net](https://game-icons.net) (CC BY 3.0). SVG-filerne lægges i
+`frontend/src/assets/icons`, og hvilket ikon der bruges hvor, står i `frontend/src/utils/icons.ts`.
+Se [README'en i ikonmappen](frontend/src/assets/icons/README.md).
 
 ## Login og sikkerhed
 

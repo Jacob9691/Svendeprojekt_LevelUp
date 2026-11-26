@@ -14,7 +14,7 @@ export function RequireAuth() {
 }
 
 /**
- * Login- og opret-sider. En bruger der er logget ind sendes videre – til den side de prøvede
+ * Login- og opret-sider. En bruger der er logget ind sendes videre, til den side de prøvede
  * at åbne før login (sat af RequireAuth), ellers til forsiden. Det er også her brugeren
  * sendes videre lige efter login.
  */

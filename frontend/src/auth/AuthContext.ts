@@ -10,7 +10,7 @@ export interface AuthContextValue {
   /** Gemmer sessionen efter login trin 2. */
   signIn: (response: AuthResponse) => void
   signOut: () => void
-  /** Henter profilen igen, f.eks. efter en opgave er gennemført. */
+  /** Henter profilen igen, fx. efter en opgave er gennemført. */
   refreshProfile: () => Promise<void>
 }
 

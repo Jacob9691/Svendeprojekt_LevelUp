@@ -23,6 +23,7 @@ import { Alert } from '../components/Form'
 import TaskModal, { type TaskModalMode } from '../components/TaskModal'
 import { addMinutes, toLocalIso } from '../utils/dates'
 import { rewardMessage } from '../utils/rewards'
+import './WeekPlanPage.css'
 
 const TASK_COLOR = '#0d6efd' // Bootstrap "primary"
 const COMPLETED_COLOR = '#198754' // Bootstrap "success"
@@ -30,7 +31,7 @@ const COMPLETED_COLOR = '#198754' // Bootstrap "success"
 function toEvent(task: TaskItem): EventInput {
   const completed = task.status === 'Completed'
 
-  // Felter sættes kun når de har en værdi – FullCalendar opfatter "color: undefined" som en farve
+  // Felter sættes kun når de har en værdi. FullCalendar opfatter "color: undefined" som en farve
   return {
     id: String(task.id),
     // ↻ viser at opgaven er del af en gentagende serie
@@ -44,7 +45,7 @@ function toEvent(task: TaskItem): EventInput {
   }
 }
 
-/** Næste hele time – bruges når man trykker "Ny opgave". */
+/** Næste hele time, bruges når man trykker "Ny opgave". */
 function nextFullHour(): Date {
   const date = new Date()
   date.setHours(date.getHours() + 1, 0, 0, 0)
@@ -130,7 +131,7 @@ export default function WeekPlanPage() {
       )}
 
       <div className="card">
-        <div className="card-body">
+        <div className="card-body levelup-calendar">
           <FullCalendar
             ref={calendarRef}
             plugins={[timeGridPlugin, interactionPlugin, classicThemePlugin]}

@@ -17,20 +17,20 @@ export interface IconDefinition {
 
 export const iconRegistry = {
   // Shoppens kategorier
-  hat: { file: 'pointy-hat', fallback: '🎩' },
-  outfit: { file: 'shirt', fallback: '👕' },
-  accessory: { file: 'broadsword', fallback: '🗡️' },
-  unknownItem: { file: 'present', fallback: '🎁' },
+  hat: { file: 'pointy-hat', fallback: '🎩', colors: true },
+  outfit: { file: 'armor-vest', fallback: '👕', colors: true },
+  accessory: { file: 'sword', fallback: '🗡️', colors: true },
+  unknownItem: { file: 'present', fallback: '🎁', colors: true },
 
   // Karakteren
-  character: { file: 'wizard-face', fallback: '🧙' },
+  character: { file: 'character', fallback: '🧙', colors: true },
 
   // Achievements
-  level: { file: 'upgrade', fallback: '⭐' },
-  tasksCompleted: { file: 'check-mark', fallback: '✅' },
-  itemsBought: { file: 'shopping-bag', fallback: '🛍️' },
-  challengesCompleted: { file: 'checkered-flag', fallback: '🏁' },
-  trophy: { file: 'trophy', fallback: '🏆' },
+  level: { file: 'star', fallback: '⭐', colors: true },
+  tasksCompleted: { file: 'check-mark', fallback: '✅', colors: true },
+  itemsBought: { file: 'shopping-bag', fallback: '🛍️', colors: true },
+  challengesCompleted: { file: 'stairs-goal', fallback: '🏁', colors: true },
+  trophy: { file: 'achievement', fallback: '🏆', colors: true },
 } satisfies Record<string, IconDefinition>
 
 export type IconName = keyof typeof iconRegistry
